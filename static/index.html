@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-K98SMMGP4Z"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-K98SMMGP4Z');
+  </script>
+  <title>Vidzova - Free Online Video Downloader, No Ads or Pop-ups</title>
+  <meta name="description" content="Paste a link and save videos as MP4 or MP3 with Vidzova. Fast, free, no sign-up, no extensions and no pop-up ads. Works on phone and desktop." />
+  <meta name="keywords" content="Vidzova, online video downloader, Snapchat video downloader, Snapchat Spotlight downloader, Snapchat Story downloader, YouTube video downloader, YouTube to MP3, Pinterest video downloader, Amazon product video downloader, Alibaba video downloader, Facebook video downloader, Instagram Reels downloader, TikTok video downloader without watermark" />
+  <meta name="author" content="Vidzova" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <link rel="canonical" href="https://vidzova.online/" />
+
+  <!-- Favicon & Touch Icons for Google Search Results & Browsers -->
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#00b956" />
+  <meta name="msapplication-TileColor" content="#00b956" />
+
+  <!-- Open Graph / Social SEO -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Vidzova" />
+  <meta property="og:title" content="Vidzova - Free Online Video Downloader, No Ads or Pop-ups" />
+  <meta property="og:description" content="Paste a link, pick MP4 or MP3, download. No sign-up, no extensions, no pop-ups. Works on phone and desktop." />
+  <meta property="og:url" content="https://vidzova.online/" />
+  <meta property="og:image" content="https://vidzova.online/android-chrome-512x512.png" />
+
+  <!-- Twitter Card SEO -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Vidzova - Free Online Video & MP3 Downloader" />
+  <meta name="twitter:description" content="Save videos from YouTube, Pinterest, Amazon, Alibaba, Facebook, Instagram, and TikTok in MP4 HD and MP3." />
+  <meta name="twitter:image" content="https://vidzova.online/android-chrome-512x512.png" />
+
+  <!-- Schema.org JSON-LD Structured Data for Google Search Rich Results -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://vidzova.online/#org",
+        "name": "Vidzova",
+        "url": "https://vidzova.online/",
+        "logo": "https://vidzova.online/android-chrome-512x512.png",
+        "email": "support@vidzova.online",
+        "sameAs": []
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://vidzova.online/#website",
+        "url": "https://vidzova.online/",
+        "name": "Vidzova",
+        "publisher": { "@id": "https://vidzova.online/#org" },
+        "inLanguage": "en"
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://vidzova.online/#app",
+        "name": "Vidzova Online Video Downloader",
+        "url": "https://vidzova.online/",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any (web browser)",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "description": "Free online tool to save videos and audio from supported public links as MP4 or MP3 without pop-up ads or extensions."
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How do I download a video with Vidzova?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Copy the video link, paste it into the box on Vidzova, press Download, then choose the format and quality you want." }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Vidzova free?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Vidzova is free to use and does not require an account." }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need to install an extension or app?",
+            "acceptedAnswer": { "@type": "Answer", "text": "No. Vidzova works in your browser on phone and desktop. We never ask you to install software or allow notifications." }
+          },
+          {
+            "@type": "Question",
+            "name": "Which formats can I save?",
+            "acceptedAnswer": { "@type": "Answer", "text": "You can save video as MP4 and audio as MP3 where the source allows it. Available quality depends on the original video." }
+          },
+          {
+            "@type": "Question",
+            "name": "Is it legal to download videos?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Only download content you own or have permission to save. Respect copyright and each platform's terms of service." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="/styles.css?v=44" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- International SEO Hreflang Tags (50+ Languages Supported - Urdu & Hindi Excluded) -->
+  <link rel="alternate" hreflang="x-default" href="https://vidzova.online/" />
+  <link rel="alternate" hreflang="en" href="https://vidzova.online/" />
+  <link rel="alternate" hreflang="es" href="https://vidzova.online/?lang=es" />
+  <link rel="alternate" hreflang="ar" href="https://vidzova.online/?lang=ar" />
+  <link rel="alternate" hreflang="zh" href="https://vidzova.online/?lang=zh-CN" />
+  <link rel="alternate" hreflang="fr" href="https://vidzova.online/?lang=fr" />
+  <link rel="alternate" hreflang="de" href="https://vidzova.online/?lang=de" />
+  <link rel="alternate" hreflang="pt" href="https://vidzova.online/?lang=pt" />
+  <link rel="alternate" hreflang="ja" href="https://vidzova.online/?lang=ja" />
+  <link rel="alternate" hreflang="ko" href="https://vidzova.online/?lang=ko" />
+  <link rel="alternate" hreflang="ru" href="https://vidzova.online/?lang=ru" />
+  <link rel="alternate" hreflang="it" href="https://vidzova.online/?lang=it" />
+  <link rel="alternate" hreflang="tr" href="https://vidzova.online/?lang=tr" />
+  <link rel="alternate" hreflang="bn" href="https://vidzova.online/?lang=bn" />
+  <link rel="alternate" hreflang="id" href="https://vidzova.online/?lang=id" />
+  <link rel="alternate" hreflang="vi" href="https://vidzova.online/?lang=vi" />
+
+</head>
+<body>
+  <!-- Top Navigation Header -->
+  <header class="sf-header">
+    <div class="sf-header-inner">
+      <a href="/" class="sf-logo" aria-label="Vidzova Home">
+        <span class="sf-logo-icon" id="logoIconBox">
+          <svg class="sf-logo-svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3.5v11"></path>
+            <path d="M7.5 10l4.5 4.5 4.5-4.5"></path>
+            <line x1="5.5" y1="19.5" x2="18.5" y2="19.5"></line>
+          </svg>
+        </span>
+        <span class="sf-logo-text"><span class="sf-logo-vid">Vid</span><span class="sf-logo-green sf-logo-zova">zova</span></span>
+      </a>
+
+      <nav class="sf-nav" aria-label="Platforms & Tools">
+        <a href="/youtube-video-downloader" class="sf-nav-link sf-nav-youtube active" data-platform="YouTube">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          YouTube
+        </a>
+        <a href="/facebook-video-downloader" class="sf-nav-link sf-nav-facebook" data-platform="Facebook">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
+        </a>
+        <a href="/instagram-video-downloader" class="sf-nav-link sf-nav-instagram" data-platform="Instagram">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E1306C"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          Instagram
+        </a>
+        <a href="/tiktok-video-downloader" class="sf-nav-link sf-nav-tiktok" data-platform="TikTok">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FE2C55"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+          TikTok
+        </a>
+        <a href="/snapchat-video-downloader" class="sf-nav-link sf-nav-snapchat" data-platform="Snapchat">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#000000"><path d="M12.206.024c-4.494 0-7.854 3.498-7.854 7.81 0 1.238.411 2.378 1.127 3.32-.084.288-.344.97-.887 1.285-.595.346-1.393.39-1.928.94-.37.382-.444.912-.178 1.408.312.584.978.887 1.63.974.195.026.39.04.582.043-.086.37-.21.73-.374 1.076-.445.942-1.22 1.614-2.247 1.897-.333.091-.58.36-.628.7-.048.342.115.681.417.864 1.348.815 2.923.864 4.394.502.818-.202 1.572-.577 2.268-1.077.587.39 1.272.637 1.996.72 1.026.117 2.062-.057 3.018-.507.956.45 1.992.624 3.018.507.724-.083 1.41-.33 1.996-.72.696.5 1.45.875 2.268 1.077 1.47.362 3.046.313 4.394-.502.302-.183.465-.522.417-.864-.048-.34-.295-.609-.628-.7-1.027-.283-1.802-.955-2.247-1.897-.164-.346-.288-.706-.374-1.076.192-.003.387-.017.582-.043.652-.087 1.318-.39 1.63-.974.266-.496.192-1.026-.178-1.408-.535-.55-1.333-.594-1.928-.94-.543-.315-.803-.997-.887-1.285.716-.942 1.127-2.082 1.127-3.32 0-4.312-3.36-7.81-7.854-7.81z"/></svg>
+          Snapchat
+        </a>
+        <a href="/twitter-video-downloader" class="sf-nav-link sf-nav-twitter" data-platform="Twitter">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          Twitter/X
+        </a>
+        <a href="/pinterest-video-downloader" class="sf-nav-link sf-nav-pinterest" data-platform="Pinterest">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E60023"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12.017 24c6.624 0 11.99-5.367 11.99-11.987C24.007 5.367 18.641 0 12.017 0z"/></svg>
+          Pinterest
+        </a>
+        <a href="/reddit-video-downloader" class="sf-nav-link sf-nav-reddit" data-platform="Reddit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FF4500"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.688-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+          Reddit
+        </a>
+        <a href="/amazon-video-downloader" class="sf-nav-link sf-nav-amazon" data-platform="Amazon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF9900" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          Amazon
+        </a>
+        <a href="/alibaba-video-downloader" class="sf-nav-link sf-nav-alibaba" data-platform="Alibaba">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6A00" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          Alibaba
+        </a>
+        <a href="/video-scene-extractor" class="sf-nav-link sf-nav-scene" title="Scene Extractor">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00D2FF" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+          Scene Extractor
+        </a>
+        <a href="/one-video-five-social-posts" class="sf-nav-link sf-nav-social" title="5 Social Posts">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C084FC" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+          5 Social Posts
+        </a>
+        <a href="/savefrom-alternative" class="sf-nav-link sf-nav-alt" title="SaveFrom Alternative">
+          SaveFrom Alternative
+        </a>
+        <a href="/faq" class="sf-nav-link sf-nav-faq" title="FAQ">
+          FAQ
+        </a>
+      </nav>
+
+      <div class="sf-header-actions">
+        <!-- Login with Google Button -->
+        <button type="button" id="googleLoginBtn" class="sf-google-login-btn" title="Login with Google">
+          <svg class="google-g-icon" width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.3 0 6.08-1.09 8.1-2.96l-3.88-3.05c-1.1.74-2.51 1.18-4.22 1.18-3.25 0-6.01-2.19-7-5.14H1.01v3.14C3.02 21.16 7.21 24 12 24z"/>
+            <path fill="#FBBC05" d="M5 14.03c-.25-.74-.4-1.54-.4-2.36s.15-1.62.4-2.36V6.17H1.01C.37 7.45 0 8.89 0 11.67s.37 4.22 1.01 5.5L5 14.03z"/>
+            <path fill="#EA4335" d="M12 4.75c1.8 0 3.41.62 4.68 1.84l3.5-3.5C18.07 1.14 15.3 0 12 0 7.21 0 3.02 2.84 1.01 6.83L5 9.97c.99-2.95 3.75-5.22 7-5.22z"/>
+          </svg>
+          <span>Login with Google</span>
+        </button>
+
+        <!-- Logged-In User Chip -->
+        <div id="userProfileBox" class="sf-user-profile hidden">
+          <div class="sf-user-avatar" id="userAvatar">U</div>
+          <div class="sf-user-info">
+            <span id="userNameText" class="sf-user-name">User</span>
+            <span id="userEmailText" class="sf-user-email">user@gmail.com</span>
+          </div>
+          <button type="button" id="googleLogoutBtn" class="sf-logout-btn" title="Sign out">
+            Sign out
+          </button>
+        </div>
+
+                <!-- Language Selector -->
+        <div class="sf-lang-selector notranslate" id="langSelector" translate="no">
+          <button type="button" class="sf-lang-btn" id="langToggleBtn" aria-label="Select Language" aria-expanded="false" title="Change Language">
+            <svg class="sf-globe-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span class="sf-lang-current" id="currentLangLabel">🌐 English</span>
+            <svg class="sf-chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="sf-lang-dropdown hidden" id="langDropdown" role="menu">
+            <div class="sf-lang-search-box">
+              <input type="text" id="langSearchInput" class="sf-lang-search-input" placeholder="Search 50+ languages..." autocomplete="off" />
+            </div>
+            <div class="sf-lang-list" id="langList">
+              <!-- Dynamically populated by i18n.js -->
+            </div>
+          </div>
+        </div>
+
+        <button id="themeToggle" class="sf-theme-btn" title="Toggle Dark/Light Mode" aria-label="Toggle theme">
+          <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Downloader Hero Section -->
+  <main>
+    <!-- Semantic Breadcrumb Navigation for SEO -->
+    <nav class="sf-breadcrumb-nav" aria-label="Breadcrumb">
+      <div class="sf-container">
+        <ol class="sf-breadcrumbs" itemscope itemtype="https://schema.org/BreadcrumbList">
+          <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a href="/" itemprop="item"><span itemprop="name">Home</span></a>
+            <meta itemprop="position" content="1" />
+          </li>
+          <li class="sf-bc-sep">/</li>
+          <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <span id="breadcrumbCurrent" itemprop="name">YouTube Video Downloader</span>
+            <meta itemprop="position" content="2" />
+          </li>
+        </ol>
+      </div>
+    </nav>
+
+    <section id="downloader" class="sf-hero">
+      <div class="sf-container">
+        <div class="sf-hero-head">
+          <!-- Single Active Category Pill Shown on Top of Online Video Downloader -->
+          <div class="sf-platform-switcher">
+            <div id="activeCategoryBadge" class="sf-plat-btn active">
+              <span id="activeCategoryIcon" class="sf-cat-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#FF0000">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              </span>
+              <span id="heroPlatformLabel">YouTube Video Downloader</span>
+            </div>
+          </div>
+
+          <h1 id="heroTitle">YouTube Video Downloader</h1>
+          <p id="heroSubtitle" class="sf-hero-sub">Download <strong>YouTube videos</strong> in MP4, 1080p, 720p, 4K HD and MP3 audio instantly for free with our fast <strong>YouTube video downloader</strong>.</p>
+          <!-- Clean Downloader Trust Banner -->
+          <div class="sf-trust-banner">
+            <span>🛡️ <strong>The Clean Downloader:</strong> Zero pop-up ads, no browser extensions, no notification spam. Only download content you own or have permission to save.</span>
+          </div>
+        </div>
+
+        <!-- SaveFrom Signature Input Box (Shows ONLY Selected Category Link Format) -->
+        <form id="searchForm" class="sf-search-box" autocomplete="off">
+          <div class="sf-input-wrapper">
+            <input
+              type="text"
+              id="videoUrlInput"
+              class="sf-input"
+              placeholder="Paste your YouTube video link here..."
+              aria-label="Video URL"
+              required
+            />
+            <div class="sf-input-tools">
+              <button type="button" id="clearInputBtn" class="sf-tool-btn hidden" title="Clear link" aria-label="Clear link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+              <button type="button" id="pasteBtn" class="sf-paste-btn" title="Paste from clipboard">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Paste</span>
+              </button>
+            </div>
+          </div>
+          <button type="submit" id="fetchBtn" class="sf-submit-btn">
+            <span class="btn-text">Download</span>
+            <svg class="btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </form>
+
+        <!-- Quick Helper / Sample Link Bar (Shows ONLY Selected Category Sample) -->
+        <div class="sf-helper-row">
+          <span id="helperTipText" class="sf-terms-note"></span>
+          <div class="sf-sample-links">
+            <span>Quick test:</span>
+            <button type="button" id="activeSampleChip" class="sf-sample-chip" data-url="https://youtu.be/e_04ZrNroTo?si=KqAGkerHW2LDd4eL">
+              ▶ YouTube Sample Video
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading Spinner State -->
+        <div id="loadingBox" class="sf-status-card hidden">
+          <div class="sf-spinner"></div>
+          <div class="sf-status-text">
+            <strong>Analyzing link...</strong>
+            <span>Fetching available resolutions, formats, and audio streams</span>
+          </div>
+        </div>
+
+        <!-- Error Message Box -->
+        <div id="errorBox" class="sf-error-card hidden">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <div class="sf-error-content">
+            <strong>Could not process link</strong>
+            <p id="errorText"></p>
+          </div>
+        </div>
+
+        <!-- SaveFrom Classic Result Box -->
+        <div id="resultCard" class="sf-result-card hidden">
+          <div class="sf-result-grid">
+            <!-- Thumbnail & Preview Column -->
+            <div class="sf-thumb-col">
+              <div class="sf-thumb-wrap" id="thumbWrapper">
+                <img id="videoThumb" src="" alt="Online Video Downloader Media Thumbnail" class="sf-thumb-img" />
+                <span id="videoDuration" class="sf-duration-badge">00:00</span>
+                <span id="videoExtractor" class="sf-extractor-badge">YouTube</span>
+                <button type="button" id="previewBtn" class="sf-play-overlay" title="Preview media">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                </button>
+              </div>
+              <div id="embedContainer" class="sf-embed-wrap hidden"></div>
+            </div>
+
+            <!-- Video Metadata & Download Controls Column -->
+            <div class="sf-info-col">
+              <h2 id="videoTitle" class="sf-video-title">Video Title</h2>
+              <div class="sf-video-meta">
+                <span id="videoAuthor" class="sf-meta-item">Creator</span>
+                <span class="sf-meta-dot">•</span>
+                <span id="videoViews" class="sf-meta-item">Ready to save</span>
+                <a id="originalLink" href="#" target="_blank" rel="noopener noreferrer" class="sf-source-link">Open source ↗</a>
+              </div>
+
+              <!-- SaveFrom Action Controls: Split Download Button + Format Selector -->
+              <div class="sf-action-area">
+                <button type="button" id="mainDownloadBtn" class="sf-dl-main-btn">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span id="mainDownloadLabel">Download</span>
+                </button>
+
+                <!-- Format Dropdown Trigger -->
+                <div class="sf-format-dropdown" id="formatDropdownContainer">
+                  <button type="button" id="formatDropdownBtn" class="sf-format-trigger" aria-expanded="false">
+                    <span id="selectedFormatText">MP4 720p</span>
+                    <span id="selectedFormatBadge" class="sf-mini-badge">HD</span>
+                    <svg class="sf-caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+
+                  <!-- Dropdown Menu -->
+                  <div id="formatMenu" class="sf-format-menu hidden">
+                    <div id="combinedFormatsGroup" class="sf-format-group">
+                      <div class="sf-format-group-title" id="combinedGroupTitle">Video / Primary Formats</div>
+                      <div id="combinedFormatsList" class="sf-format-list"></div>
+                    </div>
+
+                    <div id="videoOnlyFormatsGroup" class="sf-format-group">
+                      <div class="sf-format-group-title" id="highResGroupTitle">High Quality / Extra Formats</div>
+                      <div id="videoOnlyFormatsList" class="sf-format-list"></div>
+                    </div>
+
+                    <div id="audioFormatsGroup" class="sf-format-group">
+                      <div class="sf-format-group-title">Audio Only</div>
+                      <div id="audioFormatsList" class="sf-format-list"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selected Format Details Bar -->
+              <div class="sf-selected-details">
+                <span id="selectedFormatInfo">Ready to download • Estimated size: Auto</span>
+                <a id="directStreamLink" href="#" target="_blank" rel="noopener noreferrer" class="sf-direct-link hidden">
+                  Direct stream link ↗
+                </a>
+              </div>
+
+              <!-- Lyrics Download & Generation Box -->
+              <div class="sf-lyrics-section" id="lyricsSection">
+                <div class="sf-lyrics-actions-row">
+                  <button type="button" id="lyricsGenerateBtn" class="sf-lyrics-btn" title="Extract and download lyrics in original song language">
+                    <svg class="sf-lyrics-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9 18V5l12-2v13"></path>
+                      <circle cx="6" cy="18" r="3"></circle>
+                      <circle cx="18" cy="16" r="3"></circle>
+                    </svg>
+                    <span id="lyricsBtnText">Download Lyrics (Same Language)</span>
+                    <span id="lyricsBadge" class="sf-lyrics-badge">Generate</span>
+                  </button>
+                  <button type="button" id="lyricsOpenEditorBtn" class="sf-lyrics-sub-btn" title="Open box to view, paste or edit lyrics manually">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Paste / View Box
+                  </button>
+                  <button type="button" id="sceneExtractorBtn" class="sf-scene-extractor-btn" title="Analyze and extract keyframe scenes from this video">
+                    <svg class="sf-scene-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                      <line x1="7" y1="2" x2="7" y2="22"></line>
+                      <line x1="17" y1="2" x2="17" y2="22"></line>
+                      <line x1="2" y1="12" x2="22" y2="12"></line>
+                      <line x1="2" y1="7" x2="7" y2="7"></line>
+                      <line x1="2" y1="17" x2="7" y2="17"></line>
+                      <line x1="17" y1="17" x2="22" y2="17"></line>
+                      <line x1="17" y1="7" x2="22" y2="7"></line>
+                    </svg>
+                    <span>Extract Video Scenes</span>
+                    <span class="sf-scene-badge">New Tool</span>
+                  </button>
+                  <a href="/one-video-five-social-posts" id="socialPostsBtn" class="sf-social-posts-btn" title="Turn one video into 5 social media posts for Instagram, TikTok, YouTube Shorts, Facebook, and LinkedIn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    <span>One Video, 5 Social Posts</span>
+                    <span class="sf-social-badge">AI Tool</span>
+                  </a>
+                </div>
+
+                <!-- Expandable Lyrics Preview & File Downloader -->
+                <div id="lyricsDrawer" class="sf-lyrics-drawer hidden">
+                  <div class="sf-lyrics-bar">
+                    <div class="sf-lyrics-meta">
+                      <span class="sf-lyrics-heading">Lyrics Box</span>
+                      <span id="lyricsLangTag" class="sf-lyrics-lang-tag">Original Language</span>
+                      <span id="lyricsLineCount" class="sf-lyrics-line-count"></span>
+                    </div>
+                    <div class="sf-lyrics-tools">
+                      <button type="button" id="pasteLyricsBtn" class="sf-lyrics-tool-btn" title="Paste lyrics from clipboard">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                        </svg>
+                        <span id="pasteLyricsLabel">Paste</span>
+                      </button>
+                      <button type="button" id="copyLyricsBtn" class="sf-lyrics-tool-btn" title="Copy to clipboard">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span id="copyLyricsLabel">Copy</span>
+                      </button>
+                      <button type="button" id="saveLyricsTxtBtn" class="sf-lyrics-tool-btn sf-tool-save" title="Save as .txt file">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Save .TXT
+                      </button>
+                      <button type="button" id="closeLyricsDrawerBtn" class="sf-lyrics-close" title="Close">✕</button>
+                    </div>
+                  </div>
+                  <div class="sf-lyrics-scroll-box">
+                    <textarea id="lyricsPre" class="sf-lyrics-pre sf-lyrics-editor" placeholder="Lyrics detected online will appear here automatically, or you can paste / edit lyrics directly in this box..." rows="12" spellcheck="false"></textarea>
+                    <div class="sf-lyrics-hint">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                      </svg>
+                      <span>Analyzed & fetched from Google / Web lyrics. You can also paste or edit lyrics in this box anytime.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Real-time Download Progress Box -->
+              <div id="downloadProgressBox" class="sf-progress-box hidden">
+                <div class="sf-progress-header">
+                  <span id="progressStatusText">Preparing download...</span>
+                  <span id="progressPercentText">0%</span>
+                </div>
+                <div class="sf-progress-track">
+                  <div id="progressBarFill" class="sf-progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="sf-progress-meta">
+                  <span id="progressBytesText">0 B / ...</span>
+                  <span id="progressSpeedText"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Downloads History -->
+        <div id="historySection" class="sf-history-section hidden">
+          <div class="sf-history-header">
+            <h3>Recent Downloads</h3>
+            <button type="button" id="clearHistoryBtn" class="sf-clear-history-btn">Clear History</button>
+          </div>
+          <div id="historyList" class="sf-history-list"></div>
+        </div>
+      </div>
+    </section>
+
+        <!-- 1. Dedicated YouTube Feature Section -->
+    <section id="youtube-feature" class="sf-pinterest-section">
+      <div class="sf-container">
+        <div class="sf-pin-banner sf-yt-banner">
+          <div class="sf-pin-header">
+            <span class="sf-pin-badge sf-yt-badge">
+              ▶ YouTube Video Downloader
+            </span>
+            <h2>Download YouTube Videos &amp; MP3 Audio in 1080p, 4K Ultra HD</h2>
+            <p>Vidzova YouTube Video Downloader lets you download YouTube videos, Shorts, and playlists in MP4 HD 1080p, 4K 60fps, and studio-quality 320kbps MP3 audio for free with maximum download speed.</p>
+          </div>
+
+          <div class="sf-pin-features-grid">
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🎬</div>
+              <h3>4K &amp; Full HD 1080p MP4</h3>
+              <p>Download crisp high-bitrate video streams up to 4K resolution with clean audio and zero watermark.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🎵</div>
+              <h3>Studio MP3 &amp; M4A Audio</h3>
+              <p>Extract background music tracks, podcasts, and speeches at full 320kbps bitrate with album cover art.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">⚡</div>
+              <h3>Shorts &amp; Playlist Ready</h3>
+              <p>Supports vertical YouTube Shorts links, individual watch URLs, and mobile share links seamlessly.</p>
+            </div>
+          </div>
+
+          <div class="sf-pin-cta">
+            <button type="button" id="tryYouTubeBtn" class="sf-pin-action-btn sf-yt-action-btn">
+              ▶ Try YouTube Sample Video &amp; Test Download ↑
+            </button>
+            <div style="margin-top: 10px;">
+              <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" class="sf-ext-link">Visit Official YouTube ↗</a>
+              <span style="color: #888; margin: 0 8px;">•</span>
+              <a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14" target="_blank" rel="noopener noreferrer" class="sf-ext-link">Learn About MP4 Video Standard ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Dedicated Facebook Feature Section -->
+    <section id="facebook-feature" class="sf-pinterest-section hidden">
+      <div class="sf-container">
+        <div class="sf-pin-banner sf-fb-banner">
+          <div class="sf-pin-header">
+            <span class="sf-pin-badge sf-fb-badge">
+              📘 Facebook Video Downloader
+            </span>
+            <h2>Download Facebook Videos &amp; Reels in Full HD 1080p MP4</h2>
+            <p>Save any Facebook video, public Reel, Watch episode, or live stream recording directly to your phone or computer with our free Facebook video downloader.</p>
+          </div>
+
+          <div class="sf-pin-features-grid">
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🎥</div>
+              <h3>Facebook Reels &amp; Watch in 1080p</h3>
+              <p>Download trending viral FB Reels and Watch videos in crystal clear 1080p and 720p HD with sound.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🔒</div>
+              <h3>100% Private &amp; No Login Needed</h3>
+              <p>No account credentials or passwords required. Safe, fast, and completely anonymous direct MP4 saving.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">📱</div>
+              <h3>Mobile &amp; Desktop Gallery Save</h3>
+              <p>Download directly to iPhone camera roll, Android gallery, or PC Downloads folder without third-party apps.</p>
+            </div>
+          </div>
+
+          <div class="sf-pin-cta">
+            <button type="button" id="tryFacebookBtn" class="sf-pin-action-btn sf-fb-action-btn">
+              📘 Try Facebook Sample Video &amp; Test Download ↑
+            </button>
+            <div style="margin-top: 10px;">
+              <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="sf-ext-link">Visit Official Facebook ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Dedicated Instagram Feature Section -->
+    <section id="instagram-feature" class="sf-pinterest-section hidden">
+      <div class="sf-container">
+        <div class="sf-pin-banner sf-ig-banner">
+          <div class="sf-pin-header">
+            <span class="sf-pin-badge sf-ig-badge">
+              📸 Instagram Video Downloader
+            </span>
+            <h2>Download Instagram Reels, Stories &amp; Videos in High Quality MP4</h2>
+            <p>Vidzova Instagram Video Downloader allows you to download public Instagram Reels, IGTV clips, feed videos, and Stories in original HD MP4 without quality loss.</p>
+          </div>
+
+          <div class="sf-pin-features-grid">
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">✨</div>
+              <h3>Instagram Reels in 1080p HD</h3>
+              <p>Save viral vertical Instagram Reels with crisp audio and vivid colors directly to your gallery.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">📖</div>
+              <h3>Stories, Highlights &amp; IGTV</h3>
+              <p>Download public user Stories, saved profile Highlights, and long IGTV videos in standard MP4.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">⚡</div>
+              <h3>Instant 1-Click Mobile Save</h3>
+              <p>No browser extension or Instagram login needed; paste the share link and download immediately.</p>
+            </div>
+          </div>
+
+          <div class="sf-pin-cta">
+            <button type="button" id="tryInstagramBtn" class="sf-pin-action-btn sf-ig-action-btn">
+              📸 Try Instagram Sample Video &amp; Test Download ↑
+            </button>
+            <div style="margin-top: 10px;">
+              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="sf-ext-link">Visit Official Instagram ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Dedicated TikTok Feature Section -->
+    <section id="tiktok-feature" class="sf-pinterest-section hidden">
+      <div class="sf-container">
+        <div class="sf-pin-banner sf-tt-banner">
+          <div class="sf-pin-header">
+            <span class="sf-pin-badge sf-tt-badge">
+              🎵 TikTok Video Downloader Without Watermark
+            </span>
+            <h2>Download TikTok Videos Without Watermark in MP4 HD</h2>
+            <p>Easily download TikTok videos without watermark in high definition MP4 and extract original TikTok MP3 audio tracks with our lightning-fast TikTok video downloader.</p>
+          </div>
+
+          <div class="sf-pin-features-grid">
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">✨</div>
+              <h3>100% No Watermark</h3>
+              <p>Removes bouncing TikTok logos and creator username overlays for clean, professional video re-use.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🎬</div>
+              <h3>Original 1080p / 720p HD Quality</h3>
+              <p>Extracts source MP4 file directly from TikTok content delivery servers with maximum fidelity.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🎶</div>
+              <h3>Extract TikTok Audio (MP3)</h3>
+              <p>Save viral background sounds, popular songs, and spoken soundbites in clean MP3 audio format.</p>
+            </div>
+          </div>
+
+          <div class="sf-pin-cta">
+            <button type="button" id="tryTikTokBtn" class="sf-pin-action-btn sf-tt-action-btn">
+              🎵 Try TikTok Sample Video &amp; Test Download ↑
+            </button>
+            <div style="margin-top: 10px;">
+              <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" class="sf-ext-link">Visit Official TikTok ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Dedicated Snapchat Video Downloader Feature Section -->
+    <section id="snapchat-feature" class="sf-pinterest-section hidden">
+      <div class="sf-container">
+        <div class="sf-pin-banner sf-snap-banner">
+          <div class="sf-pin-header">
+            <span class="sf-pin-badge sf-snap-badge">
+              👻 Snapchat Video Downloader
+            </span>
+            <h2>Download Snapchat Spotlight Videos &amp; Stories Without Watermark</h2>
+            <p>Save high-resolution Snapchat Spotlight clips, public profile Stories, Snaps, and Highlights directly in MP4 HD with our free Snapchat video downloader. Fast, anonymous, and no app required.</p>
+          </div>
+
+          <div class="sf-pin-features-grid">
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">✨</div>
+              <h3>No Watermark MP4 HD</h3>
+              <p>Extracts original source video in crisp 1080p and 720p HD with clean audio and without watermark overlays.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">👻</div>
+              <h3>Spotlight &amp; Public Stories</h3>
+              <p>Supports all public Snapchat Spotlight clips, viral videos, user stories, and profile highlights.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">⚡</div>
+              <h3>100% Anonymous &amp; Free</h3>
+              <p>No login or account needed. Download videos directly to your iPhone, Android gallery, or PC.</p>
+            </div>
+          </div>
+
+          <div class="sf-pin-cta">
+            <button type="button" id="trySnapchatBtn" class="sf-pin-action-btn sf-snap-action-btn">
+              👻 Try Snapchat Sample Video &amp; Test Download ↑
+            </button>
+            <div style="margin-top: 10px;">
+              <a href="https://www.snapchat.com" target="_blank" rel="noopener noreferrer" class="sf-ext-link">Visit Official Snapchat ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Dedicated Twitter/X Feature Section -->
+    <section id="twitter-feature" class="sf-pinterest-section hidden">
+      <div class="sf-container">
+        <div class="sf-pin-banner sf-tw-banner">
+          <div class="sf-pin-header">
+            <span class="sf-pin-badge sf-tw-badge">
+              𝕏 Twitter/X Video Downloader
+            </span>
+            <h2>Download Twitter/X Videos &amp; GIFs in MP4 Full HD</h2>
+            <p>Save high-quality Twitter (X) video clips, tweets, and animated GIFs in MP4 1080p, 720p, and MP3 audio with our secure Twitter video downloader. No login required.</p>
+          </div>
+
+          <div class="sf-pin-features-grid">
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🎬</div>
+              <h3>Full HD MP4 Quality</h3>
+              <p>Extracts the highest available bitrate MP4 video (up to 1080p) directly from tweets and post links.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">⚡</div>
+              <h3>GIF &amp; Video Support</h3>
+              <p>Converts Twitter looping GIFs and video posts into clean, downloadable MP4 files with audio intact.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🔒</div>
+              <h3>Fast, Free &amp; Private</h3>
+              <p>Download directly to your device gallery or downloads folder with full privacy and high speed.</p>
+            </div>
+          </div>
+
+          <div class="sf-pin-cta">
+            <button type="button" id="tryTwitterBtn" class="sf-pin-action-btn sf-tw-action-btn">
+              𝕏 Try Twitter Sample Video &amp; Test Download ↑
+            </button>
+            <div style="margin-top: 10px;">
+              <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="sf-ext-link">Visit Official X (Twitter) ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Dedicated Pinterest Feature Section -->
+    <section id="pinterest-feature" class="sf-pinterest-section hidden">
+      <div class="sf-container">
+        <div class="sf-pin-banner">
+          <div class="sf-pin-header">
+            <span class="sf-pin-badge">
+              📌 Pinterest Downloader
+            </span>
+            <h2>Download Videos, GIFs &amp; Images from Pinterest for Free</h2>
+            <p>Save any Pinterest Video Pin in MP4 720p/1080p HD, animated GIFs, or original high-resolution Pin images directly to your device with our Pinterest video downloader.</p>
+          </div>
+
+          <div class="sf-pin-features-grid">
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🎬</div>
+              <h3>Pinterest Video Pins (MP4)</h3>
+              <p>Download Pinterest videos and Idea Pins in full HD 720p &amp; 1080p MP4 format with audio intact.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">✨</div>
+              <h3>Animated GIFs &amp; Original Images</h3>
+              <p>Automatically extracts the highest-resolution <code>originals</code> JPG, PNG, or animated GIF file from any Pin.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🔗</div>
+              <h3>Direct &amp; Short Link Support</h3>
+              <p>Works seamlessly with both desktop links and mobile app share links.</p>
+            </div>
+          </div>
+
+          <div class="sf-pin-cta">
+            <button type="button" id="tryPinterestBtn" class="sf-pin-action-btn">
+              📌 Load Sample Pinterest Pin &amp; Test Download ↑
+            </button>
+            <div style="margin-top: 10px;">
+              <a href="https://www.pinterest.com" target="_blank" rel="noopener noreferrer" class="sf-ext-link">Visit Official Pinterest ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. Dedicated Amazon Video Downloader Feature Section -->
+    <section id="amazon-feature" class="sf-pinterest-section hidden">
+      <div class="sf-container">
+        <div class="sf-pin-banner sf-amz-banner">
+          <div class="sf-pin-header">
+            <span class="sf-pin-badge sf-amz-badge">
+              🛒 Amazon Video Downloader
+            </span>
+            <h2>Download Amazon Product Videos &amp; Images by URL or ASIN</h2>
+            <p>Extract high-converting Amazon product listing videos, customer review videos, and HD gallery images in MP4 1080p/720p with our Amazon video downloader for e-commerce marketing.</p>
+          </div>
+
+          <div class="sf-pin-features-grid">
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🎥</div>
+              <h3>Product &amp; Review Videos (MP4 HD)</h3>
+              <p>Download main product showcase videos and customer review videos in high-definition MP4 format.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🏷️</div>
+              <h3>Paste Product URL or ASIN</h3>
+              <p>Enter a full product link, short share link, or just the 10-digit <code>ASIN</code> code.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🖼️</div>
+              <h3>Full-Res Product Gallery Images</h3>
+              <p>Also extracts original high-resolution <code>hiRes</code> product photos alongside the MP4 video streams.</p>
+            </div>
+          </div>
+
+          <div class="sf-pin-cta">
+            <button type="button" id="tryAmazonBtn" class="sf-pin-action-btn sf-amz-action-btn">
+              🛒 Load Sample Amazon Product Video &amp; Test Download ↑
+            </button>
+            <div style="margin-top: 10px;">
+              <a href="https://www.amazon.com" target="_blank" rel="noopener noreferrer" class="sf-ext-link">Visit Official Amazon ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. Dedicated Alibaba Video Downloader Feature Section -->
+    <section id="alibaba-feature" class="sf-pinterest-section hidden">
+      <div class="sf-container">
+        <div class="sf-pin-banner sf-ali-banner">
+          <div class="sf-pin-header">
+            <span class="sf-pin-badge sf-ali-badge">
+              📦 Alibaba Video Downloader
+            </span>
+            <h2>Download Alibaba Product &amp; Supplier Videos Without Watermark</h2>
+            <p>Save product detail videos, supplier factory tours, and HD product images in MP4 HD for e-commerce and product catalogs with our Alibaba video downloader.</p>
+          </div>
+
+          <div class="sf-pin-features-grid">
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🏭</div>
+              <h3>Alibaba Product Videos (MP4)</h3>
+              <p>Extract original unwatermarked MP4 product videos directly from product detail listings.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🛍️</div>
+              <h3>Built for E-Commerce &amp; Sellers</h3>
+              <p>Download both the supplier's MP4 video and high-resolution product images in one place.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">⚡</div>
+              <h3>Instant 1-Click MP4 Save</h3>
+              <p>No account login or browser extension required — paste the Alibaba product link and save immediately.</p>
+            </div>
+          </div>
+
+          <div class="sf-pin-cta">
+            <button type="button" id="tryAlibabaBtn" class="sf-pin-action-btn sf-ali-action-btn">
+              📦 Load Sample Alibaba Product Video &amp; Test Download ↑
+            </button>
+            <div style="margin-top: 10px;">
+              <a href="https://www.alibaba.com" target="_blank" rel="noopener noreferrer" class="sf-ext-link">Visit Official Alibaba ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. Dedicated Reddit Video Downloader Feature Section -->
+    <section id="reddit-feature" class="sf-pinterest-section hidden">
+      <div class="sf-container">
+        <div class="sf-pin-banner sf-reddit-banner">
+          <div class="sf-pin-header">
+            <span class="sf-pin-badge sf-reddit-badge">
+              🔴 Reddit Video Downloader with Audio
+            </span>
+            <h2>Download Reddit Videos with Sound (MP4 1080p HD)</h2>
+            <p>Save Reddit videos with combined audio in Full HD 1080p. Works with v.redd.it links, comments, and community clips with our Reddit video downloader.</p>
+          </div>
+
+          <div class="sf-pin-features-grid">
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🔊</div>
+              <h3>Merged Audio + Video (Full HD)</h3>
+              <p>Reddit keeps audio and video streams separate. Vidzova automatically combines them into a single high-quality MP4 file with sound.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">🔗</div>
+              <h3>v.redd.it &amp; Post Links</h3>
+              <p>Simply paste any Reddit post link or direct <code>v.redd.it</code> share link to extract all available resolutions instantly.</p>
+            </div>
+            <div class="sf-pin-feature-card">
+              <div class="sf-pin-icon">📱</div>
+              <h3>Mobile &amp; iPhone Compatible</h3>
+              <p>Save clips directly to your phone gallery on iOS Safari and Android Chrome without installing apps.</p>
+            </div>
+          </div>
+
+          <div class="sf-pin-cta">
+            <div style="margin-top: 10px;">
+              <a href="https://www.reddit.com" target="_blank" rel="noopener noreferrer" class="sf-ext-link">Visit Official Reddit ↗</a>
+            </div>
+          </div>
+
+          <div class="sf-feature-crosslinks">
+            <span>Explore More Video Downloaders:</span>
+            <a href="/youtube-video-downloader">YouTube</a> •
+            <a href="/twitter-video-downloader">Twitter/X</a> •
+            <a href="/tiktok-video-downloader">TikTok</a> •
+            <a href="/instagram-video-downloader">Instagram</a> •
+            <a href="/facebook-video-downloader">Facebook</a> •
+            <a href="/snapchat-video-downloader">Snapchat</a> •
+            <a href="/pinterest-video-downloader">Pinterest</a> •
+            <a href="/amazon-video-downloader">Amazon</a> •
+            <a href="/alibaba-video-downloader">Alibaba</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Supported Resources Section -->
+    <section class="sf-resources-section">
+      <div class="sf-container">
+        <h2 class="sf-section-title">Supported Resources</h2>
+        <p class="sf-section-subtitle">Click any platform below to switch downloader mode</p>
+        <div class="sf-resources-grid">
+          <!-- 1. YouTube -->
+          <button type="button" class="sf-resource-pill active" data-platform="YouTube">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#FF0000">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+            YouTube
+          </button>
+          <!-- 2. Facebook -->
+          <button type="button" class="sf-resource-pill sf-resource-fb" data-platform="Facebook">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#1877F2">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+            Facebook
+          </button>
+          <!-- 3. Instagram -->
+          <button type="button" class="sf-resource-pill sf-resource-ig" data-platform="Instagram">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#E1306C">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+            Instagram
+          </button>
+          <!-- 4. TikTok -->
+          <button type="button" class="sf-resource-pill sf-resource-tt" data-platform="TikTok">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#FE2C55">
+              <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+            </svg>
+            TikTok
+          </button>
+          <!-- 5. Snapchat -->
+          <button type="button" class="sf-resource-pill sf-resource-snap" data-platform="Snapchat">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#000000">
+              <path d="M12.206.024c-4.494 0-7.854 3.498-7.854 7.81 0 1.238.411 2.378 1.127 3.32-.084.288-.344.97-.887 1.285-.595.346-1.393.39-1.928.94-.37.382-.444.912-.178 1.408.312.584.978.887 1.63.974.195.026.39.04.582.043-.086.37-.21.73-.374 1.076-.445.942-1.22 1.614-2.247 1.897-.333.091-.58.36-.628.7-.048.342.115.681.417.864 1.348.815 2.923.864 4.394.502.818-.202 1.572-.577 2.268-1.077.587.39 1.272.637 1.996.72 1.026.117 2.062-.057 3.018-.507.956.45 1.992.624 3.018.507.724-.083 1.41-.33 1.996-.72.696.5 1.45.875 2.268 1.077 1.47.362 3.046.313 4.394-.502.302-.183.465-.522.417-.864-.048-.34-.295-.609-.628-.7-1.027-.283-1.802-.955-2.247-1.897-.164-.346-.288-.706-.374-1.076.192-.003.387-.017.582-.043.652-.087 1.318-.39 1.63-.974.266-.496.192-1.026-.178-1.408-.535-.55-1.333-.594-1.928-.94-.543-.315-.803-.997-.887-1.285.716-.942 1.127-2.082 1.127-3.32 0-4.312-3.36-7.81-7.854-7.81z"/>
+            </svg>
+            Snapchat
+          </button>
+          <!-- 6. Twitter/X -->
+          <button type="button" class="sf-resource-pill sf-resource-tw" data-platform="Twitter">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#1DA1F2">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            Twitter/X
+          </button>
+          <!-- 7. Pinterest -->
+          <button type="button" class="sf-resource-pill sf-resource-pin" data-platform="Pinterest">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#E60023">
+              <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12.017 24c6.624 0 11.99-5.367 11.99-11.987C24.007 5.367 18.641 0 12.017 0z"/>
+            </svg>
+            Pinterest
+          </button>
+          <!-- 8. Amazon -->
+          <button type="button" class="sf-resource-pill sf-resource-amz" data-platform="Amazon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FF9900" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            Amazon
+          </button>
+          <!-- 9. Alibaba -->
+          <button type="button" class="sf-resource-pill sf-resource-ali" data-platform="Alibaba">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FF6A00" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            Alibaba
+          </button>
+          <!-- 10. Reddit -->
+          <button type="button" class="sf-resource-pill sf-resource-reddit" data-platform="Reddit">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#FF4500"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.688-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+            Reddit
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- How to Download Guide (SaveFrom Style) -->
+    <section id="how-to" class="sf-howto-section">
+      <div class="sf-container">
+        <h2 id="howToHeading" class="sf-section-title">How to Download YouTube Videos in 3 Easy Steps</h2>
+        <div class="sf-steps-grid">
+          <div class="sf-step-card">
+            <div class="sf-step-num">1</div>
+            <h3 id="step1Title">Copy the Video URL</h3>
+            <p id="step1Desc">Open YouTube and copy the link of the video you want to save from the browser address bar.</p>
+          </div>
+          <div class="sf-step-card">
+            <div class="sf-step-num">2</div>
+            <h3 id="step2Title">Paste Link in Input Field</h3>
+            <p id="step2Desc">Paste the link into the search box at the top of this page and press the <strong>Download</strong> button.</p>
+          </div>
+          <div class="sf-step-card">
+            <div class="sf-step-num">3</div>
+            <h3 id="step3Title">Select Format &amp; Save</h3>
+            <p id="step3Desc">Choose your preferred resolution (MP4 720p, 1080p, 4K, or Audio) and click Download.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related Tools Section (Internal Links Grid for SEO) -->
+    <section class="sf-related-tools-section">
+      <div class="sf-container">
+        <h2 class="sf-section-title">Explore All Free Online Video Downloaders</h2>
+        <p class="sf-section-subtitle">Switch to our specialized downloaders for top social networks and e-commerce platforms</p>
+        <div class="sf-related-grid">
+          <a href="/youtube-video-downloader" class="sf-related-card" data-platform="YouTube" title="YouTube Video Downloader">
+            <h3><span>▶</span> YouTube Downloader</h3>
+            <p>Download YouTube videos, Shorts, and 320kbps MP3 audio in 1080p &amp; 4K HD.</p>
+          </a>
+          <a href="/facebook-video-downloader" class="sf-related-card" data-platform="Facebook" title="Facebook Video Downloader">
+            <h3><span>📘</span> Facebook Downloader</h3>
+            <p>Save Facebook Reels, Watch videos, and clips in MP4 1080p Full HD.</p>
+          </a>
+          <a href="/instagram-video-downloader" class="sf-related-card" data-platform="Instagram" title="Instagram Video Downloader">
+            <h3><span>📸</span> Instagram Downloader</h3>
+            <p>Download Instagram Reels, public Stories, and IGTV videos in high quality.</p>
+          </a>
+          <a href="/tiktok-video-downloader" class="sf-related-card" data-platform="TikTok" title="TikTok Video Downloader">
+            <h3><span>🎵</span> TikTok Downloader</h3>
+            <p>Download TikTok videos without watermark in HD MP4 with original sound.</p>
+          </a>
+          <a href="/snapchat-video-downloader" class="sf-related-card" data-platform="Snapchat" title="Snapchat Video Downloader">
+            <h3><span>👻</span> Snapchat Downloader</h3>
+            <p>Save Snapchat Spotlight clips and public Stories in MP4 HD anonymously.</p>
+          </a>
+          <a href="/twitter-video-downloader" class="sf-related-card" data-platform="Twitter" title="Twitter Video Downloader">
+            <h3><span>𝕏</span> Twitter/X Downloader</h3>
+            <p>Download Twitter (X) videos, tweets, and animated GIFs in MP4 Full HD.</p>
+          </a>
+          <a href="/pinterest-video-downloader" class="sf-related-card" data-platform="Pinterest" title="Pinterest Video Downloader">
+            <h3><span>📌</span> Pinterest Downloader</h3>
+            <p>Save Pinterest Video Pins, animated GIFs, and high-res Pin images.</p>
+          </a>
+          <a href="/amazon-video-downloader" class="sf-related-card" data-platform="Amazon" title="Amazon Video Downloader">
+            <h3><span>🛒</span> Amazon Downloader</h3>
+            <p>Extract product videos, review clips, and high-res photos by URL or ASIN.</p>
+          </a>
+          <a href="/alibaba-video-downloader" class="sf-related-card" data-platform="Alibaba" title="Alibaba Video Downloader">
+            <h3><span>📦</span> Alibaba Downloader</h3>
+            <p>Download supplier product videos and factory inspection clips in MP4.</p>
+          </a>
+          <a href="/reddit-video-downloader" class="sf-related-card" data-platform="Reddit" title="Reddit Video Downloader">
+            <h3><span>🔴</span> Reddit Downloader</h3>
+            <p>Download Reddit videos with sound, v.redd.it clips, and community posts in 1080p MP4.</p>
+          </a>
+          <a href="/video-scene-extractor" class="sf-related-card" title="Video Scene Extractor">
+            <h3><span>🎬</span> Scene Extractor</h3>
+            <p>Extract high-resolution visual keyframes and detect video scenes automatically in browser.</p>
+          </a>
+          <a href="/one-video-five-social-posts" class="sf-related-card" title="1 Video into 5 Social Posts">
+            <h3><span>✨</span> 1 Video to 5 Posts</h3>
+            <p>Repurpose any video into 5 ready-to-publish viral social posts with hooks and hashtags.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dedicated SEO Internal Linking Hub & Multi-Platform Directory -->
+    <section class="sf-directory-section" id="tools-directory">
+      <div class="sf-container">
+        <div class="sf-directory-header">
+          <span class="sf-badge-pill">🔗 Vidzova Network Directory</span>
+          <h2 class="sf-section-title">All-in-One Online Video Downloader &amp; Creator Tools Directory</h2>
+          <p class="sf-section-subtitle">Jump directly to specialized downloaders, HD stream extractors, and creator AI utilities</p>
+        </div>
+
+        <div class="sf-directory-grid">
+          <!-- Column 1: Social Media Video Downloaders -->
+          <div class="sf-directory-col">
+            <h3 class="sf-directory-col-title">
+              <span class="sf-col-icon">📱</span> Social Media Video Downloaders
+            </h3>
+            <ul class="sf-directory-list">
+              <li>
+                <a href="/youtube-video-downloader" title="YouTube Video Downloader">
+                  <strong>YouTube Video Downloader</strong>
+                  <span>Save YouTube videos, Shorts, and MP3 320kbps in 1080p &amp; 4K HD.</span>
+                </a>
+              </li>
+              <li>
+                <a href="/facebook-video-downloader" title="Facebook Video Downloader">
+                  <strong>Facebook Video Downloader</strong>
+                  <span>Download Facebook Reels, Watch videos, and clips in Full HD MP4.</span>
+                </a>
+              </li>
+              <li>
+                <a href="/instagram-video-downloader" title="Instagram Video Downloader">
+                  <strong>Instagram Video Downloader</strong>
+                  <span>Save Instagram Reels, public Stories, and IGTV clips with audio.</span>
+                </a>
+              </li>
+              <li>
+                <a href="/tiktok-video-downloader" title="TikTok Video Downloader">
+                  <strong>TikTok Video Downloader Without Watermark</strong>
+                  <span>Save clean HD TikTok videos without watermark and with sound.</span>
+                </a>
+              </li>
+              <li>
+                <a href="/snapchat-video-downloader" title="Snapchat Video Downloader">
+                  <strong>Snapchat Video Downloader</strong>
+                  <span>Download Snapchat Spotlight clips and public Stories anonymously.</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Column 2: Forums, Microblogs & Visual Discovery -->
+          <div class="sf-directory-col">
+            <h3 class="sf-directory-col-title">
+              <span class="sf-col-icon">🌐</span> Visual &amp; Forum Video Tools
+            </h3>
+            <ul class="sf-directory-list">
+              <li>
+                <a href="/twitter-video-downloader" title="Twitter/X Video Downloader">
+                  <strong>Twitter / X Video Downloader</strong>
+                  <span>Download Twitter (X) video tweets and animated GIFs in MP4 Full HD.</span>
+                </a>
+              </li>
+              <li>
+                <a href="/pinterest-video-downloader" title="Pinterest Video Downloader">
+                  <strong>Pinterest Video Downloader</strong>
+                  <span>Download Pinterest Video Pins, animated GIFs, and high-res images.</span>
+                </a>
+              </li>
+              <li>
+                <a href="/reddit-video-downloader" title="Reddit Video Downloader">
+                  <strong>Reddit Video Downloader with Audio</strong>
+                  <span>Extract Reddit videos with combined audio in Full HD 1080p MP4.</span>
+                </a>
+              </li>
+              <li>
+                <a href="/amazon-video-downloader" title="Amazon Video Downloader">
+                  <strong>Amazon Video Downloader</strong>
+                  <span>Extract product listing videos, customer reviews, and ASIN photos.</span>
+                </a>
+              </li>
+              <li>
+                <a href="/alibaba-video-downloader" title="Alibaba Video Downloader">
+                  <strong>Alibaba Video Downloader</strong>
+                  <span>Download supplier product videos and factory inspection clips in MP4.</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Column 3: AI Video Tools & Alternative Guides -->
+          <div class="sf-directory-col">
+            <h3 class="sf-directory-col-title">
+              <span class="sf-col-icon">⚡</span> Creator AI &amp; Resource Guides
+            </h3>
+            <ul class="sf-directory-list">
+              <li>
+                <a href="/video-scene-extractor" title="Video Scene Extractor">
+                  <strong>Video Scene Extractor &amp; Keyframe Finder</strong>
+                  <span>Detect shot transitions and extract high-resolution keyframes locally.</span>
+                </a>
+              </li>
+              <li>
+                <a href="/one-video-five-social-posts" title="1 Video into 5 Social Posts">
+                  <strong>1 Video Into 5 Social Posts AI Generator</strong>
+                  <span>Turn 1 long or short video into 5 ready-to-post viral social captions.</span>
+                </a>
+              </li>
+              <li>
+                <a href="/savefrom-alternative" title="SaveFrom Alternative">
+                  <strong>SaveFrom.net Ad-Free Alternative</strong>
+                  <span>The clean, safe downloader: no pop-up ads, no malware, no extensions.</span>
+                </a>
+              </li>
+              <li>
+                <a href="/faq" title="Video Downloader FAQ">
+                  <strong>Downloader Help Center &amp; FAQ</strong>
+                  <span>Guides on formats, resolutions, audio extraction, and safe downloading.</span>
+                </a>
+              </li>
+              <li>
+                <a href="/privacy-policy" title="Privacy Policy">
+                  <strong>Privacy &amp; Security Standards</strong>
+                  <span>Learn how Vidzova protects user privacy with zero data logging.</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+        <!-- FAQ Section -->
+    <section id="faq" class="sf-faq-section">
+      <div class="sf-container">
+        <h2 class="sf-section-title">Frequently Asked Questions About Video Downloader</h2>
+        <div class="sf-faq-list">
+          <details class="sf-faq-item" open>
+            <summary>How do I download YouTube, Facebook, Instagram, or TikTok videos?</summary>
+            <p>Select your category from the top navigation bar (YouTube, Facebook, Instagram, TikTok, Snapchat, Twitter, Pinterest, Amazon, Alibaba), paste the link into the box above, and click <strong>Download</strong>. Then choose your preferred MP4 resolution or MP3 format.</p>
+          </details>
+          <details class="sf-faq-item">
+            <summary>How to download TikTok videos without watermark?</summary>
+            <p>Simply copy the TikTok video link from the app or browser, select <strong>TikTok</strong> on Vidzova, and paste the URL. Our TikTok video downloader automatically strips bouncing watermarks and saves original full HD MP4 video with crystal-clear audio.</p>
+          </details>
+          <details class="sf-faq-item">
+            <summary>Can I download Snapchat Spotlight videos and Stories?</summary>
+            <p>Yes! Vidzova Snapchat Video Downloader allows you to download public Snapchat Spotlight clips, viral videos, and user Stories in MP4 HD without watermark or login.</p>
+          </details>
+          <details class="sf-faq-item">
+            <summary>How to extract MP3 audio from YouTube videos?</summary>
+            <p>Paste any YouTube URL into the search box and click Download. Under the Audio Only group in the format selector, choose <strong>MP3 320kbps</strong> or <strong>M4A Audio</strong> to download the audio track directly.</p>
+          </details>
+          <details class="sf-faq-item">
+            <summary>Where are downloaded files saved?</summary>
+            <p>Once processing reaches 100%, your browser automatically saves the MP4 or MP3 file into your default <strong>Downloads</strong> folder on Windows, Mac, Android, or iPhone camera roll.</p>
+          </details>
+          <details class="sf-faq-item">
+            <summary>Is Vidzova Video Downloader completely free?</summary>
+            <p>Yes, Vidzova is 100% free with unlimited downloads, no daily limits, no account registration required, and no hidden subscriptions.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="sf-footer">
+    <div class="sf-container sf-footer-inner">
+      <div class="sf-footer-brand">
+        <span class="sf-logo-text"><span class="sf-logo-vid">Vid</span><span class="sf-logo-green sf-logo-zova">zova</span></span>
+        <p>Fast Online Video &amp; Audio Downloader.</p>
+      </div>
+      <div class="sf-footer-links">
+        <!-- Exact sequence: YouTube, Facebook, Instagram, TikTok, Snapchat, Twitter/X, Pinterest, Amazon, Alibaba -->
+        <a href="/youtube-video-downloader" data-platform="YouTube">YouTube</a>
+        <a href="/facebook-video-downloader" data-platform="Facebook">Facebook</a>
+        <a href="/instagram-video-downloader" data-platform="Instagram">Instagram</a>
+        <a href="/tiktok-video-downloader" data-platform="TikTok">TikTok</a>
+        <a href="/snapchat-video-downloader" data-platform="Snapchat">Snapchat</a>
+        <a href="/twitter-video-downloader" data-platform="Twitter">Twitter/X</a>
+        <a href="/pinterest-video-downloader" data-platform="Pinterest">Pinterest</a>
+        <a href="/amazon-video-downloader" data-platform="Amazon">Amazon</a>
+        <a href="/alibaba-video-downloader" data-platform="Alibaba">Alibaba</a>
+        <a href="/reddit-video-downloader" data-platform="Reddit">Reddit</a>
+        <a href="/video-scene-extractor">Scene Extractor</a>
+        <a href="/one-video-five-social-posts">5 Social Posts</a>
+        <a href="#faq">FAQ</a>
+      </div>
+    </div>
+    <div class="sf-container sf-footer-legal">
+      <div class="sf-footer-legal-links">
+        <a href="/about">About Us</a>
+        <span class="sf-legal-sep">•</span>
+        <a href="/contact">Contact</a>
+        <span class="sf-legal-sep">•</span>
+        <a href="/dmca">DMCA Policy</a>
+        <span class="sf-legal-sep">•</span>
+        <a href="/privacy-policy">Privacy Policy</a>
+        <span class="sf-legal-sep">•</span>
+        <a href="/terms-of-service">Terms of Use</a>
+        <span class="sf-legal-sep">•</span>
+        <a href="/faq">FAQ</a>
+        <span class="sf-legal-sep">•</span>
+        <a href="/savefrom-alternative">SaveFrom Alternative</a>
+        <span class="sf-legal-sep">•</span>
+        <a href="/blog">Guides</a>
+      </div>
+      <p class="sf-footer-copy">&copy; 2026 Vidzova. All rights reserved. The clean online video downloader: zero pop-ups, no extensions, no notification spam. Only download content you own or have permission to save.</p>
+    </div>
+  </footer>
+
+  <!-- Direct Google Account Chooser Popup -->
+  <div id="googleLoginModal" class="sf-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="googleModalTitle">
+    <div class="sf-google-modal">
+      <button type="button" id="closeGoogleModalBtn" class="sf-modal-close" aria-label="Close">&times;</button>
+      <div class="sf-google-modal-brand">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+          <path fill="#34A853" d="M12 24c3.3 0 6.08-1.09 8.1-2.96l-3.88-3.05c-1.1.74-2.51 1.18-4.22 1.18-3.25 0-6.01-2.19-7-5.14H1.01v3.14C3.02 21.16 7.21 24 12 24z"/>
+          <path fill="#FBBC05" d="M5 14.03c-.25-.74-.4-1.54-.4-2.36s.15-1.62.4-2.36V6.17H1.01C.37 7.45 0 8.89 0 11.67s.37 4.22 1.01 5.5L5 14.03z"/>
+          <path fill="#EA4335" d="M12 4.75c1.8 0 3.41.62 4.68 1.84l3.5-3.5C18.07 1.14 15.3 0 12 0 7.21 0 3.02 2.84 1.01 6.83L5 9.97c.99-2.95 3.75-5.22 7-5.22z"/>
+        </svg>
+        <span>Sign in with Google</span>
+      </div>
+
+      <div class="sf-google-modal-header">
+        <h3 id="googleModalTitle">Choose an account</h3>
+        <p>to continue to <strong>Vidzova</strong></p>
+      </div>
+
+      <!-- 1-Click Direct Google Account List -->
+      <div id="googleAccountList" class="sf-google-account-list"></div>
+
+      <!-- Use Another Gmail Input (hidden until clicked or when entering new email) -->
+      <button type="button" id="useAnotherAccountBtn" class="sf-google-another-btn">
+        <span class="sf-another-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </span>
+        <span>Use another Google account</span>
+      </button>
+
+      <form id="googleLoginForm" class="sf-google-form hidden">
+        <div class="sf-form-group">
+          <label for="googleEmailInput">Enter your Gmail</label>
+          <input type="email" id="googleEmailInput" placeholder="example@gmail.com" autocomplete="email" required />
+        </div>
+        <button type="submit" class="sf-google-submit-btn">
+          Continue with Gmail
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/script.js?v=41"></script>
+<script src="/i18n.js?v=42"></script>
+  <script src="/pwa-install.js?v=1" defer></script>
+</body>
+</html>

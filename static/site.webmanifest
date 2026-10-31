@@ -1,0 +1,62 @@
+{
+  "name": "Vidzova Online Video Downloader",
+  "short_name": "Vidzova",
+  "id": "/?source=pwa",
+  "description": "Fast & clean online video downloader for YouTube, TikTok, Instagram, Facebook, Twitter, and Pinterest with zero ads and no sign-up.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#00b956",
+  "categories": ["utilities", "multimedia", "video"],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "YouTube Downloader",
+      "short_name": "YouTube",
+      "description": "Download YouTube videos and MP3 audio",
+      "url": "/youtube-video-downloader",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "TikTok Downloader",
+      "short_name": "TikTok",
+      "description": "Download TikTok videos without watermark",
+      "url": "/tiktok-video-downloader",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Instagram Downloader",
+      "short_name": "Instagram",
+      "description": "Download Instagram Reels and videos",
+      "url": "/instagram-video-downloader",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

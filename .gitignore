@@ -1,0 +1,13 @@
+.vercel
+supabase/.temp/
+__pycache__/
+*.py[cod]
+*$py.class
+*.exe
+cloudflared.exe
+.env
+.env.*
+*.log
+savefrom_downloads/
+.DS_Store
+Thumbs.db

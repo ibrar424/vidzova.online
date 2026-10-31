@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Ensure Googlebot-Image can fetch site favicons and logos for Search results
+User-agent: Googlebot-Image
+Allow: /favicon.ico
+Allow: /*.ico
+Allow: /*.png
+Allow: /*.svg
+Allow: /
+
+# Keep dynamic result pages and internal paths out of the index
+Disallow: /download
+Disallow: /api/
+Disallow: /result/
+Disallow: /*?url=
+Disallow: /*?v=
+
+Sitemap: https://vidzova.online/sitemap.xml
+Sitemap: https://www.vidzova.online/sitemap.xml
+
+# LLM & AI Discovery Standard
+# https://vidzova.online/llms.txt

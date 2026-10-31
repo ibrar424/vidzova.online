@@ -1,0 +1,33 @@
+# Vidzova
+
+> Vidzova is a fast, free, privacy-first online video downloader, MP3 audio converter, and Video Scene Keyframe Extractor supporting YouTube, Facebook, Instagram, TikTok, Snapchat, Twitter/X, Pinterest, Amazon, and Alibaba.
+
+## Overview
+Vidzova is a high-speed web utility that allows users, creators, students, and educators to download public media files for personal offline viewing, research, and fair use. It operates as a stateless client-directed media proxy tool with zero registration required and no storage of user files.
+
+## Core Capabilities
+- **Multi-Resolution Video Downloads**: Save videos in MP4 format across 1080p (Full HD), 720p (HD), 480p, and 360p.
+- **Audio Extraction**: Convert video soundtracks directly to studio-grade MP3 audio (up to 320kbps).
+- **Video Scene Extractor**: Analyze video scenes, automatically detect visual cut transitions or sample at custom intervals (e.g. every 5 seconds), preview keyframes on a timeline, and download individual frames or complete ZIP bundles with manifest logs.
+- **Lyrics Downloader**: Generate and download lyrics in the original song language (.txt file) with one click.
+- **Privacy First**: No accounts, no personal tracking, and no permanent server archiving of downloaded streams or analyzed videos.
+- **Cross-Platform**: Fully responsive and optimized for mobile (iOS, Android) and desktop browsers (Chrome, Safari, Firefox, Edge).
+
+## Supported Platforms & Tools
+- [One Video, 5 Social Posts](https://vidzova.online/one-video-five-social-posts): AI-powered video repurposing tool that turns one video into 5 platform-optimized posts for Instagram Reels, TikTok, YouTube Shorts, Facebook Reels, and LinkedIn.
+- [Video Scene Extractor](https://vidzova.online/video-scene-extractor): Extract keyframes from videos, detect scene changes, preview important moments, and export images individually or as a ZIP package.
+- [YouTube Video Downloader](https://vidzova.online/youtube-video-downloader): Download YouTube videos, Shorts, and convert to MP3 audio.
+- [Facebook Video Downloader](https://vidzova.online/facebook-video-downloader): Download Facebook Watch videos, Reels, and public posts in HD MP4.
+- [Instagram Video Downloader](https://vidzova.online/instagram-video-downloader): Save Instagram Reels, video posts, and IGTV clips seamlessly.
+- [TikTok Video Downloader](https://vidzova.online/tiktok-video-downloader): Fast TikTok video downloader with clean audio extraction.
+- [Snapchat Video Downloader](https://vidzova.online/snapchat-video-downloader): Download public Snapchat Spotlight clips and story media in original high quality.
+- [Twitter / X Video Downloader](https://vidzova.online/twitter-video-downloader): Download Twitter (X) video clips, GIF MP4s, and interviews in multiple resolutions.
+- [Pinterest Video Downloader](https://vidzova.online/pinterest-video-downloader): Save Pinterest video pins, DIY guides, and aesthetic idea reels directly in full MP4 quality.
+- [Amazon Video Downloader](https://vidzova.online/amazon-video-downloader): Download Amazon product review, unboxing, and showcase video clips via URL or ASIN.
+- [Alibaba Video Downloader](https://vidzova.online/alibaba-video-downloader): Save supplier overview videos, machinery demonstrations, and product reels from Alibaba.
+- [YouTube to MP3 Converter](https://vidzova.online/youtube-to-mp3): Extract high-bitrate MP3 320kbps audio from any YouTube link.
+
+## Legal & Company Information
+- [About Us](https://vidzova.online/about): Platform mission, architecture, and developer support contact (support@vidzova.online).
+- [Terms of Service](https://vidzova.online/terms-of-service): Acceptable use, fair use guidelines, copyright obligations, and disclaimers.
+- [Privacy Policy](https://vidzova.online/privacy-policy): GDPR and CCPA compliant privacy statement confirming zero retention of media files.

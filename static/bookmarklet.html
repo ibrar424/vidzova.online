@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-K98SMMGP4Z"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-K98SMMGP4Z');
+  </script>
+  <title>Vidzova 1-Click Browser Bookmarklet &amp; Embed Badge | Vidzova</title>
+  <meta name="description" content="Add the free Vidzova 1-click bookmarklet to your browser bar. Download YouTube, TikTok, Instagram, and Reddit videos instantly without copying links.">
+  <link rel="canonical" href="https://vidzova.online/bookmarklet">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0f172a">
+
+  <!-- Favicon & Touch Icons for Google Search Results & Browsers -->
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="stylesheet" href="/styles.css?v=44" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    .sf-tool-page {
+      max-width: 860px;
+      margin: 40px auto 60px;
+      padding: 0 20px;
+    }
+    .sf-tool-box {
+      background: var(--sf-surface, #ffffff);
+      border: 1px solid var(--sf-border, #e2e8f0);
+      border-radius: 16px;
+      padding: 36px 32px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      margin-bottom: 32px;
+    }
+    body.dark-mode .sf-tool-box {
+      background: #18202c;
+      border-color: #2c384b;
+    }
+    .sf-bookmarklet-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #00b956 0%, #008f42 100%);
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 14px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(0, 185, 86, 0.35);
+      cursor: move;
+      margin: 20px 0;
+      transition: transform 0.2s ease;
+    }
+    .sf-bookmarklet-btn:hover {
+      transform: scale(1.03);
+    }
+    .sf-code-box {
+      background: #0f172a;
+      color: #38bdf8;
+      padding: 16px;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 0.88rem;
+      overflow-x: auto;
+      border: 1px solid #334155;
+      position: relative;
+    }
+    .sf-copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #1e293b;
+      color: #ffffff;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="dark-mode">
+  <header class="sf-header">
+    <div class="sf-container sf-header-inner">
+      <a href="/" class="sf-logo" title="Vidzova Home">
+        <span class="sf-logo-vid">Vid</span><span class="sf-logo-green sf-logo-zova">zova</span>
+      </a>
+      <nav class="sf-nav">
+        <a href="/youtube-video-downloader" class="sf-nav-link">YouTube</a>
+        <a href="/tiktok-video-downloader" class="sf-nav-link">TikTok</a>
+        <a href="/instagram-video-downloader" class="sf-nav-link">Instagram</a>
+        <a href="/facebook-video-downloader" class="sf-nav-link">Facebook</a>
+        <a href="/reddit-video-downloader" class="sf-nav-link">Reddit</a>
+        <a href="/bookmarklet" class="sf-nav-link active">Bookmarklet</a>
+        <a href="/blog" class="sf-nav-link">Guides</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="sf-tool-page">
+    <div class="sf-tool-box">
+      <span class="sf-badge-pill">⚡ 1-Click Utility</span>
+      <h1 style="font-size: 2rem; margin: 12px 0 8px;">Vidzova 1-Click Video Downloader Bookmarklet</h1>
+      <p style="color: #94a3b8; font-size: 1.05rem;">
+        Download videos from YouTube, TikTok, Instagram, Twitter, Facebook, or Reddit without having to copy-paste URLs.
+      </p>
+
+      <h2 style="font-size: 1.25rem; margin-top: 28px;">How to Install:</h2>
+      <ol style="color: #cbd5e1; line-height: 1.8; margin-left: 20px;">
+        <li>Make sure your browser's <strong>Bookmarks Bar</strong> is visible (Press <kbd>Ctrl+Shift+B</kbd> on Windows or <kbd>Cmd+Shift+B</kbd> on Mac).</li>
+        <li><strong>Drag and drop</strong> the green button below into your bookmarks bar:</li>
+      </ol>
+
+      <div style="text-align: center; margin: 24px 0;">
+        <a class="sf-bookmarklet-btn" href="javascript:(function(){var u=encodeURIComponent(window.location.href);window.open('https://vidzova.online/?url='+u,'_blank');})();" title="Drag me to your Bookmarks Bar!">
+          <span>⬇ Download with Vidzova</span>
+        </a>
+        <p style="font-size: 0.85rem; color: #94a3b8;">(Drag this button to your Bookmarks bar, or click to test)</p>
+      </div>
+
+      <h2 style="font-size: 1.25rem; margin-top: 28px;">How to Use:</h2>
+      <p style="color: #cbd5e1;">
+        Whenever you are watching a video on YouTube, scrolling TikTok, browsing Instagram Reels, or watching a Reddit clip, just click <strong>"Download with Vidzova"</strong> in your bookmarks bar. A new tab will instantly open on Vidzova with all video and audio download options ready!
+      </p>
+    </div>
+
+    <!-- Embed Badge for Webmasters & Bloggers -->
+    <div class="sf-tool-box">
+      <span class="sf-badge-pill">🔗 Webmaster &amp; Blogger Badge</span>
+      <h2 style="font-size: 1.5rem; margin: 12px 0 8px;">Embed Vidzova Badge on Your Site or GitHub</h2>
+      <p style="color: #94a3b8;">
+        Add a clean download button or badge to your blog, personal website, or GitHub repository README:
+      </p>
+
+      <div style="margin: 20px 0; text-align: center;">
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px;">Badge Preview:</p>
+        <a href="https://vidzova.online" target="_blank" rel="noopener">
+          <img src="/badge.svg" alt="Vidzova Free Online Video Downloader" style="height: 38px;" />
+        </a>
+      </div>
+
+      <p style="font-size: 0.9rem; font-weight: 600; margin-bottom: 6px;">HTML Code Snippet:</p>
+      <div class="sf-code-box">
+        <button type="button" class="sf-copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.innerText='Copied!'; setTimeout(()=>this.innerText='Copy', 2000);">Copy</button>
+        <code>&lt;a href="https://vidzova.online" target="_blank" title="Free Online Video Downloader - Vidzova"&gt;
+  &lt;img src="https://vidzova.online/badge.svg" alt="Vidzova Video Downloader" /&gt;
+&lt;/a&gt;</code>
+      </div>
+
+      <p style="font-size: 0.9rem; font-weight: 600; margin: 16px 0 6px;">Markdown Code Snippet (for GitHub / README):</p>
+      <div class="sf-code-box">
+        <button type="button" class="sf-copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.innerText='Copied!'; setTimeout(()=>this.innerText='Copy', 2000);">Copy</button>
+        <code>[![Vidzova Video Downloader](https://vidzova.online/badge.svg)](https://vidzova.online)</code>
+      </div>
+    </div>
+  </main>
+
+  <footer class="sf-footer">
+    <div class="sf-container sf-footer-inner" style="text-align: center; padding: 24px 0;">
+      <p style="color: #94a3b8; font-size: 0.9rem;">
+        &copy; 2026 <a href="/" style="color: #00b956; text-decoration: none; font-weight: 700;">Vidzova</a>. Fast, clean online video downloader.
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
