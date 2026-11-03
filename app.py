@@ -90,7 +90,7 @@ def get_base_ydl_opts():
         "fragment_retries": 10,
         "extractor_args": {
             "youtube": {
-                "player_client": ["web_embedded", "visionos"],
+                "player_client": ["android", "android_embedded", "web_embedded"],
             }
         },
     }
@@ -2598,7 +2598,7 @@ def extract_lyrics_same_language(url: str, hint_title: str = ""):
         "skip_download": True,
         "extractor_args": {
             "youtube": {
-                "player_client": ["web_embedded", "visionos"],
+                "player_client": ["android", "android_embedded", "web_embedded"],
             }
         },
     }
@@ -2767,7 +2767,7 @@ def get_video_info():
         try:
             vr_opts = get_base_ydl_opts()
             vr_opts["extract_flat"] = False
-            vr_opts["extractor_args"] = {"youtube": {"player_client": ["web_embedded", "visionos"]}}
+            vr_opts["extractor_args"] = {"youtube": {"player_client": ["android", "android_embedded", "web_embedded"]}}
             with yt_dlp.YoutubeDL(vr_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
         except Exception:
@@ -3325,7 +3325,7 @@ def run_download_job(job_id: str, url: str, format_id: str, title: str, ext_hint
                             "format": "96-0/95-0/94-0/93-0/18/bestvideo[height<=720]+bestaudio/best[height<=720]/best" if FFMPEG_PATH else "96-0/95-0/94-0/93-0/18/best[ext=mp4]/best",
                             "outtmpl": outtmpl,
                             "progress_hooks": [progress_hook],
-                            "extractor_args": {"youtube": {"player_client": ["web_embedded", "visionos"]}},
+                            "extractor_args": {"youtube": {"player_client": ["android", "android_embedded", "web_embedded"]}},
                         })
                         if FFMPEG_PATH and not is_audio_only:
                             fallback_opts["merge_output_format"] = "mp4"
@@ -3416,7 +3416,7 @@ def download_stream():
             fb_opts.update({
                 "format": "18/96-0/95-0/94-0/best[ext=mp4]/best",
                 "outtmpl": outtmpl,
-                "extractor_args": {"youtube": {"player_client": ["web_embedded", "android"]}},
+                "extractor_args": {"youtube": {"player_client": ["android", "android_embedded"]}},
             })
             if FFMPEG_PATH and not is_audio_only:
                 fb_opts["merge_output_format"] = "mp4"
