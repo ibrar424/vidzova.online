@@ -607,20 +607,45 @@ document.addEventListener("DOMContentLoaded", () => {
     videoUrlInput.focus();
   });
 
-  // Paste button
+  // Paste button (supports clipboard API + fallback + auto-fetch)
   pasteBtn.addEventListener("click", async () => {
     try {
       const text = await navigator.clipboard.readText();
-      if (text) {
+      if (text && text.trim()) {
         const trimmed = text.trim();
         videoUrlInput.value = trimmed;
         clearInputBtn.classList.remove("hidden");
         autoDetectPlatformFromUrl(trimmed);
         fetchVideoInfo(trimmed);
+        return;
       }
-    } catch {
+    } catch {}
+
+    // Fallback if browser blocked clipboard reading:
+    const existing = videoUrlInput.value.trim();
+    if (existing) {
+      autoDetectPlatformFromUrl(existing);
+      fetchVideoInfo(existing);
+    } else {
       videoUrlInput.focus();
+      const originalPlaceholder = videoUrlInput.placeholder;
+      videoUrlInput.placeholder = "👉 Press Ctrl+V (or right-click Paste) to insert your link!";
+      setTimeout(() => {
+        videoUrlInput.placeholder = originalPlaceholder;
+      }, 4000);
     }
+  });
+
+  // Automatically fetch video details as soon as user pastes into input
+  videoUrlInput.addEventListener("paste", () => {
+    setTimeout(() => {
+      const val = videoUrlInput.value.trim();
+      if (val && val.length > 5) {
+        clearInputBtn.classList.remove("hidden");
+        autoDetectPlatformFromUrl(val);
+        fetchVideoInfo(val);
+      }
+    }, 120);
   });
 
   // Single active sample chip click
@@ -917,6 +942,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const jobId = data.job_id;
+      if (data.status === "completed" && data.direct_download_url) {
+        progressStatusText.textContent = `Starting download for "${data.filename || 'video'}"...`;
+        progressPercentText.textContent = "100%";
+        progressBarFill.style.width = "100%";
+        mainDownloadBtn.disabled = false;
+        const a = document.createElement("a");
+        a.href = data.direct_download_url;
+        a.download = data.filename || "download";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => a.remove(), 500);
+        return;
+      }
       pollDownloadJob(jobId);
     } catch (err) {
       progressStatusText.textContent = `Error: ${err.message}`;

@@ -1464,7 +1464,7 @@ def should_proxy_to_tunnel():
         return None
     is_cloud = bool(os.environ.get("VERCEL")) or ("vidzova.online" in host) or ("vercel.app" in host)
     if is_cloud:
-        tunnel = os.environ.get("TUNNEL_URL", "https://dept-basics-efficiently-mental.trycloudflare.com")
+        tunnel = (os.environ.get("TUNNEL_URL") or "").strip()
         if tunnel:
             return tunnel.rstrip("/")
     return None
@@ -2803,7 +2803,7 @@ def get_video_info():
 
     if info is None:
         # 1. If datacenter extraction failed, proxy to residential tunnel FIRST for full streams & direct URLs
-        tunnel = os.environ.get("TUNNEL_URL", "https://dept-basics-efficiently-mental.trycloudflare.com")
+        tunnel = (os.environ.get("TUNNEL_URL") or "").strip()
         if tunnel and "127.0.0.1" not in request.host and "localhost" not in request.host:
             try:
                 proxy_req = urllib.request.Request(
@@ -3376,6 +3376,88 @@ def run_download_job(job_id: str, url: str, format_id: str, title: str, ext_hint
             JOBS[job_id]["error"] = err_msg
 
 
+
+@app.route("/api/download-stream", methods=["GET"])
+def download_stream():
+    """Stream or serve media directly on serverless cloud without background thread dependency."""
+    raw_url = request.args.get("url", "")
+    url = normalize_url(raw_url)
+    format_id = request.args.get("format_id", "18/best[ext=mp4]/best")
+    title = request.args.get("title", "video")
+    ext_hint = request.args.get("ext", "mp4").lower()
+
+    if not url:
+        return jsonify({"error": "Missing video URL parameter."}), 400
+
+    safe_title = sanitize_filename(title) or "download"
+    job_dir = os.path.join(tempfile.gettempdir(), f"stream_{uuid.uuid4().hex[:12]}")
+    os.makedirs(job_dir, exist_ok=True)
+
+    is_audio_only = "mp3" in format_id or ext_hint in ("mp3", "m4a", "wav")
+    ext_out = "mp3" if is_audio_only else ("mp4" if ext_hint in ("mp4", "mkv", "mov") else ext_hint)
+    outtmpl = os.path.join(job_dir, f"{safe_title}.%(ext)s")
+
+    ydl_opts = get_base_ydl_opts()
+    ydl_opts.update({
+        "format": format_id,
+        "outtmpl": outtmpl,
+    })
+    if FFMPEG_PATH and not is_audio_only:
+        ydl_opts["merge_output_format"] = "mp4"
+        ydl_opts["postprocessor_args"] = {"Merger": ["-threads", "0", "-c", "copy"]}
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+    except Exception as e:
+        # Resilient fallback with embedded and android client
+        try:
+            fb_opts = get_base_ydl_opts()
+            fb_opts.update({
+                "format": "18/96-0/95-0/94-0/best[ext=mp4]/best",
+                "outtmpl": outtmpl,
+                "extractor_args": {"youtube": {"player_client": ["web_embedded", "android"]}},
+            })
+            if FFMPEG_PATH and not is_audio_only:
+                fb_opts["merge_output_format"] = "mp4"
+            with yt_dlp.YoutubeDL(fb_opts) as ydl:
+                ydl.download([url])
+        except Exception as fb_err:
+            try:
+                shutil.rmtree(job_dir, ignore_errors=True)
+            except Exception:
+                pass
+            return jsonify({"error": f"Download failed: {fb_err}"}), 500
+
+    files = [
+        os.path.join(job_dir, f)
+        for f in os.listdir(job_dir)
+        if not f.endswith(".part") and not f.endswith(".ytdl")
+    ]
+    if not files:
+        try:
+            shutil.rmtree(job_dir, ignore_errors=True)
+        except Exception:
+            pass
+        return jsonify({"error": "Downloaded media file not found."}), 500
+
+    final_file = max(files, key=os.path.getsize)
+
+    @after_this_request
+    def cleanup_stream_dir(response):
+        try:
+            shutil.rmtree(job_dir, ignore_errors=True)
+        except Exception:
+            pass
+        return response
+
+    return send_file(
+        final_file,
+        as_attachment=True,
+        download_name=os.path.basename(final_file) or f"{safe_title}.{ext_out}",
+    )
+
+
 @app.route("/api/download-start", methods=["POST"])
 def start_download():
     data = request.get_json(silent=True) or {}
@@ -3408,6 +3490,22 @@ def start_download():
     direct_url = (data.get("direct_url") or "").strip()
     if not direct_url and (format_id or "").startswith("direct::"):
         direct_url = format_id.split("direct::", 1)[1]
+
+    # Cloud / Vercel Serverless direct streaming handler
+    host = (request.host or "").lower()
+    is_cloud = bool(os.environ.get("VERCEL")) or ("vidzova.online" in host) or ("vercel.app" in host)
+    if is_cloud:
+        encoded_url = urllib.parse.quote(url, safe="")
+        encoded_fmt = urllib.parse.quote(format_id, safe="")
+        encoded_title = urllib.parse.quote(safe_title, safe="")
+        stream_url = f"/api/download-stream?url={encoded_url}&format_id={encoded_fmt}&title={encoded_title}&ext={ext_hint}"
+        return jsonify({
+            "job_id": f"stream_{uuid.uuid4().hex[:8]}",
+            "status": "completed",
+            "progress": 100.0,
+            "filename": f"{safe_title}.{ext_hint}",
+            "direct_download_url": stream_url
+        })
 
     if direct_url and direct_url.startswith(("http://", "https://")) and not any(x in direct_url for x in ["googlevideo.com", "hls_playlist", ".m3u8"]):
         encoded_url = urllib.parse.quote(direct_url, safe="")
@@ -3553,7 +3651,7 @@ def get_public_config():
             "SUPABASE_ANON_KEY",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhdmlwbXBlZWd4aGt1eWhyaHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4NzEwMDcsImV4cCI6MjEwODQ0NzAwN30.u1VIOKaURK2uBASIzzQhAqXBrAF5njwSivwOYPO_wuI",
         ),
-        "tunnel_url": os.environ.get("TUNNEL_URL", "https://dept-basics-efficiently-mental.trycloudflare.com"),
+        "tunnel_url": os.environ.get("TUNNEL_URL", ""),
     })
 
 
