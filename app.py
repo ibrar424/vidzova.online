@@ -3397,12 +3397,19 @@ def download_stream():
     ext_out = "mp3" if is_audio_only else ("mp4" if ext_hint in ("mp4", "mkv", "mov") else ext_hint)
     outtmpl = os.path.join(job_dir, f"{safe_title}.%(ext)s")
 
+    is_yt = bool(re.search(r"(?:v=|youtu\.be/|shorts/|embed/)([A-Za-z0-9_-]{11})", url))
     ydl_opts = get_base_ydl_opts()
+    if is_yt:
+        ydl_opts["extractor_args"] = {"youtube": {"player_client": ["android"]}}
+        target_format = "18/best" if is_audio_only else "18/best[ext=mp4]/best"
+    else:
+        target_format = format_id
+
     ydl_opts.update({
-        "format": format_id,
+        "format": target_format,
         "outtmpl": outtmpl,
     })
-    if FFMPEG_PATH and not is_audio_only:
+    if FFMPEG_PATH and not is_audio_only and not is_yt:
         ydl_opts["merge_output_format"] = "mp4"
         ydl_opts["postprocessor_args"] = {"Merger": ["-threads", "0", "-c", "copy"]}
 
