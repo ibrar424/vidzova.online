@@ -32,7 +32,7 @@ def add_no_cache_headers(response):
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     response.headers["Access-Control-Allow-Private-Network"] = "true"
     if (
-        request.path in ("/", "/video-scene-extractor", "/one-video-five-social-posts", "/one-video-5-social-posts", "/video-to-social-posts", "/video-scene-detection", "/video-keyframes-extractor", "/download-from-pinterest", "/amazon-video-downloader", "/alibaba-video-downloader", "/youtube-video-downloader", "/pinterest-video-downloader", "/facebook-video-downloader", "/instagram-video-downloader", "/tiktok-video-downloader", "/twitter-video-downloader", "/youtube-to-mp3", "/snapchat-video-downloader", "/download-from-snapchat")
+        request.path in ("/", "/scene-extractor", "/video-scene-extractor", "/one-video-five-social-posts", "/one-video-5-social-posts", "/video-to-social-posts", "/video-scene-detection", "/video-keyframes-extractor", "/download-from-pinterest", "/amazon-video-downloader", "/alibaba-video-downloader", "/youtube-video-downloader", "/pinterest-video-downloader", "/facebook-video-downloader", "/instagram-video-downloader", "/tiktok-video-downloader", "/twitter-video-downloader", "/youtube-to-mp3", "/snapchat-video-downloader", "/download-from-snapchat")
         or request.path.endswith((".html", ".css", ".js", ".ico", ".png", ".svg", ".webmanifest"))
     ):
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -1341,6 +1341,7 @@ def serve_badge():
     return send_from_directory(app.static_folder, "badge.svg", mimetype="image/svg+xml")
 
 
+@app.route("/scene-extractor", strict_slashes=False)
 @app.route("/video-scene-extractor", strict_slashes=False)
 @app.route("/video-scene-detection", strict_slashes=False)
 @app.route("/video-keyframes-extractor", strict_slashes=False)
