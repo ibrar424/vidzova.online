@@ -161,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function getPlatformFromPath(path) {
     const p = (path || window.location.pathname).toLowerCase();
     if (p.includes("reddit")) return "Reddit";
-    const p = (path || window.location.pathname).toLowerCase();
     if (p.includes("pinterest")) return "Pinterest";
     if (p.includes("snapchat")) return "Snapchat";
     if (p.includes("amazon")) return "Amazon";
@@ -628,11 +627,15 @@ document.addEventListener("DOMContentLoaded", () => {
       fetchVideoInfo(existing);
     } else {
       videoUrlInput.focus();
+      const span = pasteBtn.querySelector("span");
+      const origText = span ? span.textContent : "Paste";
+      if (span) span.textContent = "Ctrl + V";
       const originalPlaceholder = videoUrlInput.placeholder;
-      videoUrlInput.placeholder = "👉 Press Ctrl+V (or right-click Paste) to insert your link!";
+      videoUrlInput.placeholder = "👉 Press Ctrl+V (or right-click Paste) to insert link!";
       setTimeout(() => {
+        if (span) span.textContent = origText;
         videoUrlInput.placeholder = originalPlaceholder;
-      }, 4000);
+      }, 3500);
     }
   });
 
