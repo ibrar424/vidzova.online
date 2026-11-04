@@ -88,11 +88,7 @@ def get_base_ydl_opts():
         "buffersize": 1024 * 128,  # 128KB socket buffer
         "retries": 10,
         "fragment_retries": 10,
-        "extractor_args": {
-            "youtube": {
-                "player_client": ["android", "android_embedded", "web_embedded"],
-            }
-        },
+
     }
     cookies_env = os.environ.get("YOUTUBE_COOKIES") or os.environ.get("COOKIES_DATA")
     if cookies_env:
@@ -874,9 +870,10 @@ def extract_snapchat_media(url: str):
 
 
 def sanitize_filename(name: str) -> str:
-    cleaned = re.sub(r'[\\/*?:"<>|]', "", name or "video")
-    cleaned = re.sub(r"\s+", " ", cleaned).strip()
-    return cleaned[:140] or "video"
+    cleaned = re.sub(r'[\\/*?:"<>|#%;&]', "", name or "video")
+    cleaned = cleaned.encode("ascii", "ignore").decode("ascii")
+    cleaned = re.sub(r"\s+", " ", cleaned).strip(" ._-")
+    return cleaned[:120] or "video"
 
 
 
@@ -1464,8 +1461,8 @@ def should_proxy_to_tunnel():
         return None
     is_cloud = bool(os.environ.get("VERCEL")) or ("vidzova.online" in host) or ("vercel.app" in host)
     if is_cloud:
-        tunnel = (os.environ.get("TUNNEL_URL") or "").strip()
-        if tunnel:
+        tunnel = (os.environ.get("TUNNEL_URL") or "https://smoking-streets-betty-festivals.trycloudflare.com").strip()
+        if tunnel and tunnel.startswith("http"):
             return tunnel.rstrip("/")
     return None
 
@@ -2596,11 +2593,7 @@ def extract_lyrics_same_language(url: str, hint_title: str = ""):
         "no_warnings": True,
         "noplaylist": True,
         "skip_download": True,
-        "extractor_args": {
-            "youtube": {
-                "player_client": ["android", "android_embedded", "web_embedded"],
-            }
-        },
+
     }
     with yt_dlp.YoutubeDL(opts) as ydl:
         info = ydl.extract_info(url, download=False)
@@ -2803,7 +2796,7 @@ def get_video_info():
 
     if info is None:
         # 1. If datacenter extraction failed, proxy to residential tunnel FIRST for full streams & direct URLs
-        tunnel = (os.environ.get("TUNNEL_URL") or "").strip()
+        tunnel = (os.environ.get("TUNNEL_URL") or "https://smoking-streets-betty-festivals.trycloudflare.com").strip()
         if tunnel and "127.0.0.1" not in request.host and "localhost" not in request.host:
             try:
                 proxy_req = urllib.request.Request(
@@ -2961,25 +2954,28 @@ def get_video_info():
         has_video = vcodec and vcodec != "none"
         has_audio = acodec and acodec != "none"
 
-        if has_video and not has_audio and height and height >= 240:
+        width = f.get("width")
+        res_p = min(width, height) if (width and height) else height
+
+        if has_video and not has_audio and height and res_p and res_p >= 240:
             if ext not in ("mp4", "webm"):
                 continue
 
             badge = (
-                "4K" if height >= 2160
-                else ("2K" if height >= 1440
-                      else ("FHD" if height >= 1080
-                            else ("HD" if height >= 720 else "SD")))
+                "4K" if res_p >= 2160
+                else ("2K" if res_p >= 1440
+                      else ("FHD" if res_p >= 1080
+                            else ("HD" if res_p >= 720 else "SD")))
             )
 
-            if has_ffmpeg and height in (360, 480, 720, 1080) and height not in seen_combined_heights:
-                seen_combined_heights.add(height)
+            if has_ffmpeg and res_p in (360, 480, 720, 1080) and res_p not in seen_combined_heights:
+                seen_combined_heights.add(res_p)
                 merged_size = (filesize + best_audio_size) if filesize else None
                 combined_formats.append({
                     "format_id": f"{fmt_id}+bestaudio[ext=m4a]/{fmt_id}+bestaudio/bestvideo[height<={height}]+bestaudio/best",
                     "ext": "MP4",
-                    "quality": f"{height}p",
-                    "height": height,
+                    "quality": f"{res_p}p",
+                    "height": res_p,
                     "fps": int(fps) if fps else 30,
                     "category": "combined",
                     "has_audio": True,
@@ -2987,7 +2983,7 @@ def get_video_info():
                     "filesize": merged_size,
                     "filesize_str": format_bytes(merged_size) or "Auto",
                     "direct_url": f.get("url", ""),
-                    "label": f"MP4 {height}p",
+                    "label": f"MP4 {res_p}p",
                     "badge": badge,
                 })
                 continue
@@ -3187,8 +3183,8 @@ def download_direct_media(job_id: str, media_url: str, job_dir: str, safe_title:
 def run_download_job(job_id: str, url: str, format_id: str, title: str, ext_hint: str):
     job_dir = os.path.join(DOWNLOAD_DIR, job_id)
     os.makedirs(job_dir, exist_ok=True)
-    safe_title = sanitize_filename(title)
-    outtmpl = os.path.join(job_dir, f"{safe_title}.%(ext)s")
+    safe_title = sanitize_filename(title) or "video"
+    outtmpl = os.path.join(job_dir, "media_out.%(ext)s")
 
     def progress_hook(d):
         with JOBS_LOCK:
@@ -3363,11 +3359,12 @@ def run_download_job(job_id: str, url: str, format_id: str, title: str, ext_hint
                 raise RuntimeError("Download finished but output file was not found.")
             final_file = max(files, key=os.path.getsize)
 
+        actual_ext = os.path.splitext(final_file)[1].lstrip(".") or ext_hint or "mp4"
         with JOBS_LOCK:
             JOBS[job_id]["status"] = "completed"
             JOBS[job_id]["progress"] = 100.0
             JOBS[job_id]["filepath"] = final_file
-            JOBS[job_id]["filename"] = os.path.basename(final_file)
+            JOBS[job_id]["filename"] = f"{safe_title}.{actual_ext}"
             JOBS[job_id]["filesize_str"] = format_bytes(os.path.getsize(final_file))
     except Exception as e:
         err_msg = re.sub(r"\x1b\[[0-9;]*m", "", str(e))
@@ -3380,9 +3377,14 @@ def run_download_job(job_id: str, url: str, format_id: str, title: str, ext_hint
 @app.route("/api/download-stream", methods=["GET"])
 def download_stream():
     """Stream or serve media directly on serverless cloud without background thread dependency."""
+    tunnel = should_proxy_to_tunnel()
+    if tunnel:
+        qs = request.query_string.decode("utf-8", errors="ignore")
+        return redirect(f"{tunnel}/api/download-stream?{qs}")
+
     raw_url = request.args.get("url", "")
     url = normalize_url(raw_url)
-    format_id = request.args.get("format_id", "18/best[ext=mp4]/best")
+    format_id = request.args.get("format_id", "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best")
     title = request.args.get("title", "video")
     ext_hint = request.args.get("ext", "mp4").lower()
 
@@ -3395,21 +3397,15 @@ def download_stream():
 
     is_audio_only = "mp3" in format_id or ext_hint in ("mp3", "m4a", "wav")
     ext_out = "mp3" if is_audio_only else ("mp4" if ext_hint in ("mp4", "mkv", "mov") else ext_hint)
-    outtmpl = os.path.join(job_dir, f"{safe_title}.%(ext)s")
+    outtmpl = os.path.join(job_dir, "media_out.%(ext)s")
 
-    is_yt = bool(re.search(r"(?:v=|youtu\.be/|shorts/|embed/)([A-Za-z0-9_-]{11})", url))
     ydl_opts = get_base_ydl_opts()
-    if is_yt:
-        ydl_opts["extractor_args"] = {"youtube": {"player_client": ["android"]}}
-        target_format = "18/best" if is_audio_only else "18/best[ext=mp4]/best"
-    else:
-        target_format = format_id
-
+    target_format = "bestaudio[ext=m4a]/bestaudio/best" if is_audio_only else format_id
     ydl_opts.update({
         "format": target_format,
         "outtmpl": outtmpl,
     })
-    if FFMPEG_PATH and not is_audio_only and not is_yt:
+    if FFMPEG_PATH and not is_audio_only:
         ydl_opts["merge_output_format"] = "mp4"
         ydl_opts["postprocessor_args"] = {"Merger": ["-threads", "0", "-c", "copy"]}
 
@@ -3458,10 +3454,11 @@ def download_stream():
             pass
         return response
 
+    actual_ext = os.path.splitext(final_file)[1].lstrip(".") or ext_out
     return send_file(
         final_file,
         as_attachment=True,
-        download_name=os.path.basename(final_file) or f"{safe_title}.{ext_out}",
+        download_name=f"{safe_title}.{actual_ext}",
     )
 
 
@@ -3576,7 +3573,10 @@ def download_status(job_id):
             )
             with urllib.request.urlopen(proxy_req, timeout=12) as proxy_res:
                 if proxy_res.status == 200:
-                    return Response(proxy_res.read(), status=200, mimetype="application/json")
+                    st_data = json.loads(proxy_res.read().decode("utf-8", errors="ignore"))
+                    if st_data.get("status") == "completed" and not st_data.get("direct_download_url"):
+                        st_data["direct_download_url"] = f"{tunnel}/api/download-file/{job_id}"
+                    return jsonify(st_data)
         except Exception:
             pass
 
@@ -3606,9 +3606,11 @@ def download_file(job_id):
         if direct_url.startswith(("http://", "https://")):
             return redirect(direct_url)
 
-    # Forward to residential tunnel when on Vercel
+    # Forward to residential tunnel when on Vercel (redirect directly to bypass Vercel 4.5MB payload limit)
     tunnel = should_proxy_to_tunnel()
     if tunnel:
+        return redirect(f"{tunnel}/api/download-file/{job_id}")
+    if False:
         try:
             tunnel_file_url = f"{tunnel}/api/download-file/{job_id}"
             tunnel_req = urllib.request.Request(tunnel_file_url, headers={"User-Agent": BROWSER_UA, "X-Vidzova-Proxy": "1"})
@@ -3658,7 +3660,7 @@ def get_public_config():
             "SUPABASE_ANON_KEY",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhdmlwbXBlZWd4aGt1eWhyaHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4NzEwMDcsImV4cCI6MjEwODQ0NzAwN30.u1VIOKaURK2uBASIzzQhAqXBrAF5njwSivwOYPO_wuI",
         ),
-        "tunnel_url": os.environ.get("TUNNEL_URL", ""),
+        "tunnel_url": os.environ.get("TUNNEL_URL", "https://smoking-streets-betty-festivals.trycloudflare.com"),
     })
 
 
