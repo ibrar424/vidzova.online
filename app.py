@@ -33,11 +33,13 @@ def add_no_cache_headers(response):
     response.headers["Access-Control-Allow-Private-Network"] = "true"
     if (
         request.path in ("/", "/scene-extractor", "/video-scene-extractor", "/one-video-five-social-posts", "/one-video-5-social-posts", "/video-to-social-posts", "/video-scene-detection", "/video-keyframes-extractor", "/download-from-pinterest", "/amazon-video-downloader", "/alibaba-video-downloader", "/youtube-video-downloader", "/pinterest-video-downloader", "/facebook-video-downloader", "/instagram-video-downloader", "/tiktok-video-downloader", "/twitter-video-downloader", "/youtube-to-mp3", "/snapchat-video-downloader", "/download-from-snapchat")
-        or request.path.endswith((".html", ".css", ".js", ".ico", ".png", ".svg", ".webmanifest"))
+        or request.path.endswith((".html", ".css", ".js"))
     ):
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
+    elif request.path.endswith((".ico", ".png", ".svg", ".webmanifest")):
+        response.headers["Cache-Control"] = "public, max-age=604800, immutable"
     return response
 
 
@@ -1306,9 +1308,25 @@ def serve_favicon():
 
 
 @app.route("/favicon-48x48.png")
-def serve_favicon_48():
-    response = send_from_directory(app.static_folder, "favicon-48x48.png", mimetype="image/png")
-    response.headers["Cache-Control"] = "public, max-age=604800"
+@app.route("/favicon-96x96.png")
+@app.route("/favicon-144x144.png")
+@app.route("/favicon-192x192.png")
+@app.route("/favicon-32x32.png")
+@app.route("/favicon-16x16.png")
+@app.route("/favicon.png")
+@app.route("/android-chrome-192x192.png")
+@app.route("/android-chrome-512x512.png")
+def serve_favicon_pngs():
+    fname = request.path.lstrip("/")
+    response = send_from_directory(app.static_folder, fname, mimetype="image/png")
+    response.headers["Cache-Control"] = "public, max-age=604800, immutable"
+    return response
+
+
+@app.route("/favicon.svg")
+def serve_favicon_svg():
+    response = send_from_directory(app.static_folder, "favicon.svg", mimetype="image/svg+xml")
+    response.headers["Cache-Control"] = "public, max-age=604800, immutable"
     return response
 
 
