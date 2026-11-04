@@ -61,7 +61,7 @@
         "url": "https://vidzova.online/",
         "logo": "https://vidzova.online/android-chrome-512x512.png",
         "email": "support@vidzova.online",
-        "sameAs": []
+        "sameAs": ["https://github.com/ibrar424/vidzova.online"]
       },
       {
         "@type": "WebSite",
@@ -272,15 +272,13 @@
     <!-- Semantic Breadcrumb Navigation for SEO -->
     <nav class="sf-breadcrumb-nav" aria-label="Breadcrumb">
       <div class="sf-container">
-        <ol class="sf-breadcrumbs" itemscope itemtype="https://schema.org/BreadcrumbList">
-          <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-            <a href="/" itemprop="item"><span itemprop="name">Home</span></a>
-            <meta itemprop="position" content="1" />
+        <ol class="sf-breadcrumbs">
+          <li>
+            <a href="/"><span>Home</span></a>
           </li>
           <li class="sf-bc-sep">/</li>
-          <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-            <span id="breadcrumbCurrent" itemprop="name">YouTube Video Downloader</span>
-            <meta itemprop="position" content="2" />
+          <li>
+            <span id="breadcrumbCurrent">YouTube Video Downloader</span>
           </li>
         </ol>
       </div>
@@ -383,7 +381,7 @@
             <!-- Thumbnail & Preview Column -->
             <div class="sf-thumb-col">
               <div class="sf-thumb-wrap" id="thumbWrapper">
-                <img id="videoThumb" src="" alt="Online Video Downloader Media Thumbnail" class="sf-thumb-img" />
+                <img id="videoThumb" src="" width="320" height="180" alt="Online Video Downloader Media Thumbnail" class="sf-thumb-img" />
                 <span id="videoDuration" class="sf-duration-badge">00:00</span>
                 <span id="videoExtractor" class="sf-extractor-badge">YouTube</span>
                 <button type="button" id="previewBtn" class="sf-play-overlay" title="Preview media">

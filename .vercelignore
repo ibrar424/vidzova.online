@@ -1,0 +1,9 @@
+.git
+.agent
+.agents
+.vercel
+supabase
+__pycache__
+*.exe
+*.log
+savefrom_downloads

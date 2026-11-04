@@ -905,7 +905,7 @@ SEO_PAGES = {
         "platform": "Reddit",
         "keyword": "Reddit Video Downloader with Audio",
         "slug": "reddit-video-downloader",
-        "title": "Reddit Video Downloader with Audio - Save Reddit Videos HD MP4 | Vidzova",
+        "title": "Reddit Video Downloader with Audio (HD MP4) | Vidzova",
         "description": "Download Reddit videos with audio in HD 1080p MP4. Fast, free, and works on iPhone, Android, and PC. Save Reddit clips and v.redd.it links.",
         "h1": "Reddit Video Downloader with Audio",
         "subtitle": "Download <strong>Reddit videos</strong> with audio in full HD MP4 with our free, clean <strong>Reddit video downloader</strong>.",
@@ -924,7 +924,7 @@ SEO_PAGES = {
         "platform": "YouTube",
         "keyword": "YouTube Video Downloader",
         "slug": "youtube-video-downloader",
-        "title": "YouTube Video Downloader - Download YouTube Videos & MP3 in 1080p, 4K | Vidzova",
+        "title": "YouTube Video Downloader - Free HD MP4 & 4K | Vidzova",
         "description": "Download YouTube videos and extract high-bitrate MP3 audio in 1080p, 720p, 4K 60fps for free. Fast, clean, and no software required.",
         "h1": "YouTube Video Downloader",
         "subtitle": "Download <strong>YouTube videos</strong> in MP4, 1080p, 720p, 4K HD and MP3 audio instantly for free with our fast <strong>YouTube video downloader</strong>.",
@@ -939,11 +939,30 @@ SEO_PAGES = {
             ("Can I download YouTube Shorts?", "Yes, paste the YouTube Shorts link and Vidzova will extract the vertical MP4 HD video instantly.")
         ]
     },
+    "youtube_mp3": {
+        "platform": "YouTube",
+        "keyword": "YouTube to MP3 Converter",
+        "slug": "youtube-to-mp3",
+        "title": "YouTube to MP3 Converter - Free 320kbps Audio | Vidzova",
+        "description": "Convert YouTube videos and Shorts to studio-quality 320kbps MP3 audio for free. Fast, clean, and no sign-up or browser extensions required.",
+        "h1": "YouTube to MP3 Converter",
+        "subtitle": "Convert <strong>YouTube videos to MP3</strong> in studio-quality 320kbps audio instantly for free with our clean <strong>YouTube to MP3 converter</strong>.",
+        "placeholder": "Paste your YouTube video or music link here to extract MP3...",
+        "badge": "YouTube to MP3 Converter",
+        "feature_id": "youtube-feature",
+        "body_class": "",
+        "rating_count": "17640",
+        "faq": [
+            ("How to convert YouTube videos to MP3?", "Paste the YouTube video link into Vidzova, click Download, and choose the MP3 320kbps audio format."),
+            ("What audio quality does Vidzova support?", "Vidzova extracts high-bitrate MP3 320kbps and original M4A/WEBM audio streams."),
+            ("Can I convert YouTube Shorts to MP3?", "Yes, paste any YouTube Short link to download its audio track as an MP3 file.")
+        ]
+    },
     "facebook": {
         "platform": "Facebook",
         "keyword": "Facebook Video Downloader",
         "slug": "facebook-video-downloader",
-        "title": "Facebook Video Downloader - Download Facebook Videos & Reels HD MP4 | Vidzova",
+        "title": "Facebook Video Downloader - Save HD MP4 & Reels | Vidzova",
         "description": "Download Facebook videos, Reels, and Watch clips in full HD 1080p MP4 or MP3 audio with our fast, free Facebook video downloader. No login needed.",
         "h1": "Facebook Video Downloader",
         "subtitle": "Download <strong>Facebook videos</strong>, Reels, and Watch clips in full HD 1080p MP4 with our free online <strong>Facebook video downloader</strong>.",
@@ -962,7 +981,7 @@ SEO_PAGES = {
         "platform": "Instagram",
         "keyword": "Instagram Video Downloader",
         "slug": "instagram-video-downloader",
-        "title": "Instagram Video Downloader - Download IG Reels, Stories & Videos MP4 | Vidzova",
+        "title": "Instagram Video Downloader - Save Reels & Stories | Vidzova",
         "description": "Download Instagram videos, Reels, IGTV, and Stories in original HD MP4 without compression. Free, anonymous, and no app required.",
         "h1": "Instagram Video Downloader",
         "subtitle": "Download <strong>Instagram videos</strong>, Reels, IGTV, and Stories in high quality MP4 with our fast <strong>Instagram video downloader</strong>.",
@@ -981,7 +1000,7 @@ SEO_PAGES = {
         "platform": "TikTok",
         "keyword": "TikTok Video Downloader Without Watermark",
         "slug": "tiktok-video-downloader",
-        "title": "TikTok Video Downloader Without Watermark - Download TikTok MP4 HD | Vidzova",
+        "title": "TikTok Video Downloader Without Watermark (HD) | Vidzova",
         "description": "Download TikTok videos without watermark in MP4 HD 1080p and extract TikTok MP3 audio tracks for free. Fast, clean, and no watermark.",
         "h1": "TikTok Video Downloader Without Watermark",
         "subtitle": "Download <strong>TikTok videos</strong> without watermark in crystal-clear MP4 HD with our lightning-fast <strong>TikTok video downloader</strong>.",
@@ -1000,7 +1019,7 @@ SEO_PAGES = {
         "platform": "Snapchat",
         "keyword": "Snapchat Video Downloader",
         "slug": "snapchat-video-downloader",
-        "title": "Snapchat Video Downloader - Download Snapchat Spotlight & Stories MP4 | Vidzova",
+        "title": "Snapchat Video Downloader - Spotlight & Stories | Vidzova",
         "description": "Save Snapchat Spotlight clips, public Stories, and Snaps in MP4 HD without watermark. Free, anonymous, and no app required.",
         "h1": "Snapchat Video Downloader",
         "subtitle": "Download <strong>Snapchat videos</strong>, Spotlight clips, and public Stories in MP4 HD without watermark with our free <strong>Snapchat video downloader</strong>.",
@@ -1019,7 +1038,7 @@ SEO_PAGES = {
         "platform": "Twitter",
         "keyword": "Twitter Video Downloader",
         "slug": "twitter-video-downloader",
-        "title": "Twitter Video Downloader - Download X & Twitter Videos, GIFs HD | Vidzova",
+        "title": "Twitter / X Video Downloader - Save HD MP4 & GIFs | Vidzova",
         "description": "Download Twitter (X) videos, tweets, and animated GIFs in MP4 Full HD 1080p/720p and MP3 audio for free. Safe and fast.",
         "h1": "Twitter Video Downloader",
         "subtitle": "Download <strong>Twitter videos</strong> and X posts, GIF clips in MP4 1080p HD with our secure <strong>Twitter video downloader</strong>.",
@@ -1038,7 +1057,7 @@ SEO_PAGES = {
         "platform": "Pinterest",
         "keyword": "Pinterest Video Downloader",
         "slug": "pinterest-video-downloader",
-        "title": "Pinterest Video Downloader - Download Pins, Videos & GIFs in HD | Vidzova",
+        "title": "Pinterest Video Downloader - Save Pins & GIFs HD | Vidzova",
         "description": "Save Pinterest Video Pins, animated GIFs, and high-resolution Pin images in MP4 HD (1080p/720p) directly to your device for free.",
         "h1": "Pinterest Video Downloader",
         "subtitle": "Download <strong>Pinterest videos</strong>, Idea Pins, and animated GIFs in MP4 HD with our free online <strong>Pinterest video downloader</strong>.",
@@ -1057,7 +1076,7 @@ SEO_PAGES = {
         "platform": "Amazon",
         "keyword": "Amazon Video Downloader",
         "slug": "amazon-video-downloader",
-        "title": "Amazon Video Downloader - Download Amazon Product Videos & Photos | Vidzova",
+        "title": "Amazon Product Video & Image Downloader (HD) | Vidzova",
         "description": "Extract Amazon product listing videos, customer review videos, and HD gallery images in MP4 1080p/720p by product URL or ASIN code.",
         "h1": "Amazon Video Downloader",
         "subtitle": "Download <strong>Amazon product videos</strong>, review videos, and high-res listing images in MP4 HD with our <strong>Amazon video downloader</strong>.",
@@ -1076,7 +1095,7 @@ SEO_PAGES = {
         "platform": "Alibaba",
         "keyword": "Alibaba Video Downloader",
         "slug": "alibaba-video-downloader",
-        "title": "Alibaba Video Downloader - Download Supplier Videos & Photos MP4 | Vidzova",
+        "title": "Alibaba Product Video & Image Downloader (HD) | Vidzova",
         "description": "Save Alibaba product detail videos, supplier factory tours, and HD product photos in MP4 without watermarks for e-commerce sourcing.",
         "h1": "Alibaba Video Downloader",
         "subtitle": "Download <strong>Alibaba product videos</strong> and supplier factory inspection clips in MP4 HD with our <strong>Alibaba video downloader</strong>.",
@@ -1099,6 +1118,8 @@ def render_seo_page(req_path):
     p = (req_path or "").lower().strip()
     if p in ["/", ""]:
         key = "home"
+    elif "mp3" in p:
+        key = "youtube_mp3"
     elif "reddit" in p:
         key = "reddit"
     elif "facebook" in p:
@@ -1142,6 +1163,17 @@ def render_seo_page(req_path):
 
     # 3. Schema.org JSON-LD (Tip 5: 0 Schema Errors)
     schema_graph = [
+        {
+            "@type": "Organization",
+            "@id": "https://vidzova.online/#org",
+            "name": "Vidzova",
+            "url": "https://vidzova.online/",
+            "logo": "https://vidzova.online/android-chrome-512x512.png",
+            "email": "support@vidzova.online",
+            "sameAs": [
+                "https://github.com/ibrar424/vidzova.online"
+            ]
+        },
         {
             "@type": "WebSite",
             "name": "Vidzova",
@@ -1217,7 +1249,7 @@ def render_seo_page(req_path):
     content = content.replace('alt="Online Video Downloader Media Thumbnail"', f'alt="{cfg["keyword"]} Media Thumbnail"')
 
     # 7. Breadcrumb text (Tip 6, Tip 8)
-    content = re.sub(r'<span id="breadcrumbCurrent" itemprop="name">.*?</span>', f'<span id="breadcrumbCurrent" itemprop="name">{cfg["keyword"]}</span>', content, count=1)
+    content = re.sub(r'<span id="breadcrumbCurrent"[^>]*>.*?</span>', f'<span id="breadcrumbCurrent">{cfg["keyword"]}</span>', content, count=1)
 
     # 8. Platform Badge, Input Placeholder, and Active Nav Classes
     content = re.sub(r'<span id="heroPlatformLabel">.*?</span>', f'<span id="heroPlatformLabel">{cfg["badge"]}</span>', content, count=1)
@@ -2153,6 +2185,7 @@ def add_seo_security_headers(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
     if request.path.startswith(("/api/", "/download")):
         response.headers["X-Robots-Tag"] = "noindex, nofollow"
     return response
