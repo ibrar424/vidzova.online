@@ -2174,6 +2174,26 @@ def savefrom_alternative_page():
     return send_from_directory(app.static_folder, "savefrom-alternative.html")
 
 
+@app.route("/y2mate-alternative", strict_slashes=False)
+def y2mate_alternative_page():
+    return send_from_directory(app.static_folder, "y2mate-alternative.html")
+
+
+@app.route("/ssstik-alternative", strict_slashes=False)
+def ssstik_alternative_page():
+    return send_from_directory(app.static_folder, "ssstik-alternative.html")
+
+
+@app.route("/snaptik-alternative", strict_slashes=False)
+def snaptik_alternative_page():
+    return send_from_directory(app.static_folder, "snaptik-alternative.html")
+
+
+@app.route("/cobalt-alternative", strict_slashes=False)
+def cobalt_alternative_page():
+    return send_from_directory(app.static_folder, "cobalt-alternative.html")
+
+
 @app.route("/blog", strict_slashes=False)
 @app.route("/guides", strict_slashes=False)
 def blog_page():
