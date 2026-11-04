@@ -853,8 +853,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (lDrawer) lDrawer.classList.add("hidden");
     if (lBtn) {
       lBtn.disabled = false;
-      if (lBtnText) lBtnText.textContent = "Download Lyrics (Same Language)";
-      if (lBadge) lBadge.textContent = "Generate";
+      if (lBtnText) lBtnText.textContent = "Generate Video Transcript";
+      if (lBadge) lBadge.textContent = "Transcript";
     }
 
     resultCard.classList.remove("hidden");
@@ -1321,7 +1321,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = filename || "lyrics.txt";
+    link.download = filename || "transcript.txt";
     document.body.appendChild(link);
     link.click();
     setTimeout(() => {
@@ -1336,7 +1336,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (lyricsLineCount) {
       lyricsLineCount.textContent = count ? `• ${count} lines` : "";
     }
-    const songTitle = (currentVideo && currentVideo.title) || "Song Lyrics";
+    const songTitle = (currentVideo && currentVideo.title) || "Video Transcript";
     const safeTitle = songTitle.replace(/[\\/*?:"<>|]/g, "").trim().slice(0, 50);
     if (!currentLyricsData) {
       currentLyricsData = {
@@ -1344,13 +1344,13 @@ document.addEventListener("DOMContentLoaded", () => {
         language: "Original / Custom",
         lyrics: text,
         line_count: count,
-        filename: `${safeTitle} - Lyrics.txt`,
+        filename: `${safeTitle} - Transcript.txt`,
       };
     } else {
       currentLyricsData.lyrics = text;
       currentLyricsData.line_count = count;
       if (!currentLyricsData.filename) {
-        currentLyricsData.filename = `${safeTitle} - Lyrics.txt`;
+        currentLyricsData.filename = `${safeTitle} - Transcript.txt`;
       }
     }
   }
@@ -1379,7 +1379,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (text && text.trim() && lyricsPre) {
           lyricsPre.value = text;
           updateLyricsFromBox(text);
-          if (lyricsLangTag) lyricsLangTag.textContent = "Pasted Lyrics (Custom)";
+          if (lyricsLangTag) lyricsLangTag.textContent = "Custom Transcript";
           if (pasteLyricsLabel) pasteLyricsLabel.textContent = "Pasted! ✓";
           setTimeout(() => {
             if (pasteLyricsLabel) pasteLyricsLabel.textContent = "Paste";
@@ -1401,8 +1401,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!url) return;
 
       lyricsGenerateBtn.disabled = true;
-      if (lyricsBtnText) lyricsBtnText.textContent = "Analyzing Video & Searching Google Lyrics...";
-      if (lyricsBadge) lyricsBadge.textContent = "Searching...";
+      if (lyricsBtnText) lyricsBtnText.textContent = "Extracting Video Transcript & Captions...";
+      if (lyricsBadge) lyricsBadge.textContent = "Extracting...";
 
       const videoTitle = (currentVideo && currentVideo.title) || "";
 
@@ -1431,28 +1431,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (!res.ok || data.error || !data.lyrics) {
-          throw new Error(data.error || "Lyrics not available in original language for this media.");
+          throw new Error(data.error || "Transcript not available for this video.");
         }
 
         currentLyricsData = data;
-        if (lyricsLangTag) lyricsLangTag.textContent = `Original Language (${data.language})`;
+        if (lyricsLangTag) lyricsLangTag.textContent = `Transcript (${data.language})`;
         if (lyricsLineCount) lyricsLineCount.textContent = `• ${data.line_count} lines`;
         if (lyricsPre) {
           lyricsPre.value = data.lyrics;
         }
         if (lyricsDrawer) lyricsDrawer.classList.remove("hidden");
 
-        if (lyricsBtnText) lyricsBtnText.textContent = `Lyrics Generated (${data.language}) ✓`;
+        if (lyricsBtnText) lyricsBtnText.textContent = `Transcript Ready (${data.language}) ✓`;
         if (lyricsBadge) lyricsBadge.textContent = "Downloaded";
 
         // Auto download .txt file
         downloadLyricsAsFile(data.filename, data.lyrics);
       } catch (err) {
-        alert(err.message || "Could not retrieve lyrics for this video. You can paste lyrics into the box manually!");
+        alert(err.message || "Could not extract transcript for this video. You can paste transcript text into the box manually!");
         if (lyricsDrawer) lyricsDrawer.classList.remove("hidden");
         if (lyricsPre) lyricsPre.focus();
-        if (lyricsBtnText) lyricsBtnText.textContent = "Download Lyrics (Same Language)";
-        if (lyricsBadge) lyricsBadge.textContent = "Generate";
+        if (lyricsBtnText) lyricsBtnText.textContent = "Generate Video Transcript";
+        if (lyricsBadge) lyricsBadge.textContent = "Transcript";
       } finally {
         lyricsGenerateBtn.disabled = false;
       }
@@ -1463,13 +1463,13 @@ document.addEventListener("DOMContentLoaded", () => {
     saveLyricsTxtBtn.addEventListener("click", () => {
       const textToSave = (lyricsPre && lyricsPre.value) || (currentLyricsData && currentLyricsData.lyrics);
       if (textToSave && textToSave.trim()) {
-        const songTitle = (currentVideo && currentVideo.title) || (currentLyricsData && currentLyricsData.title) || "Song Lyrics";
+        const songTitle = (currentVideo && currentVideo.title) || (currentLyricsData && currentLyricsData.title) || "Video Transcript";
         const safeTitle = songTitle.replace(/[\\/*?:"<>|]/g, "").trim().slice(0, 50);
         const langPart = (currentLyricsData && currentLyricsData.language) ? ` (${currentLyricsData.language})` : "";
-        const fn = (currentLyricsData && currentLyricsData.filename) || `${safeTitle} - Lyrics${langPart}.txt`;
+        const fn = (currentLyricsData && currentLyricsData.filename) || `${safeTitle} - Transcript${langPart}.txt`;
         downloadLyricsAsFile(fn, textToSave);
       } else {
-        alert("Please paste or generate lyrics into the box before saving!");
+        alert("Please generate or paste transcript text into the box before saving!");
       }
     });
   }

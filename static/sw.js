@@ -1,5 +1,5 @@
 /* Vidzova Service Worker v1.0 */
-const CACHE_NAME = 'vidzova-v2';
+const CACHE_NAME = 'vidzova-v3';
 const STATIC_ASSETS = [
   '/',
   '/site.webmanifest',

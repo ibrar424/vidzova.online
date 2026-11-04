@@ -2179,10 +2179,10 @@ def google_search_console_verify(verification_code):
 
 LYRICS_LANG_MAP = {
     "pa": "Punjabi",
-    "hi": "Hindi",
+    "hi": "Original",
     "en": "English",
     "es": "Spanish",
-    "ur": "Urdu",
+    "ur": "Original",
     "ar": "Arabic",
     "bn": "Bengali",
     "te": "Telugu",
@@ -2480,192 +2480,250 @@ def get_youtube_title_oembed(url):
         return None, None
 
 
+def _format_ms_timestamp(ms: int) -> str:
+    total_sec = max(0, int(ms // 1000))
+    mins, secs = divmod(total_sec, 60)
+    hrs, mins = divmod(mins, 60)
+    if hrs > 0:
+        return f"[{hrs:02d}:{mins:02d}:{secs:02d}]"
+    return f"[{mins:02d}:{secs:02d}]"
+
+
+def parse_json3_transcript(raw_content: str) -> str:
+    """Parse YouTube json3 timedtext into a clean timestamped video transcript."""
+    try:
+        data = json.loads(raw_content)
+        events = data.get("events") or []
+        lines = []
+        prev_text = ""
+        for ev in events:
+            segs = ev.get("segs")
+            if not segs:
+                continue
+            txt = "".join(s.get("utf8", "") for s in segs).replace("\n", " ")
+            txt = re.sub(r"\s+", " ", txt).strip()
+            if not txt or txt == prev_text:
+                continue
+            start_ms = ev.get("tStartMs", 0)
+            ts = _format_ms_timestamp(start_ms)
+            lines.append(f"{ts} {txt}")
+            prev_text = txt
+        return "\n".join(lines)
+    except Exception:
+        return ""
+
+
 def clean_subtitles_to_lyrics(raw_content: str) -> str:
-    """Clean VTT/SRT subtitles into well-formatted readable song lyrics."""
+    """Clean VTT/SRT/XML subtitles into well-formatted readable video transcript."""
+    if raw_content.lstrip().startswith("{"):
+        j3 = parse_json3_transcript(raw_content)
+        if j3:
+            return j3
     lines = raw_content.splitlines()
     clean_lines = []
     prev_line = ""
+    current_ts = ""
     for line in lines:
         line = line.strip()
-        if not line or line.startswith("WEBVTT") or line.startswith("Kind:") or line.startswith("Language:") or "-->" in line or line.isdigit():
+        if not line or line.startswith("WEBVTT") or line.startswith("Kind:") or line.startswith("Language:") or line.isdigit():
             continue
-        line = re.sub(r"<[^>]+>", "", line).strip()
+        if "-->" in line:
+            m = re.match(r"(?:(\d{2}):)?(\d{2}):(\d{2})", line)
+            if m:
+                hh, mm, ss = m.groups()
+                current_ts = f"[{hh}:{mm}:{ss}]" if hh and hh != "00" else f"[{mm}:{ss}]"
+            continue
+        line = re.sub(r"<[^>]+>", "", line)
+        line = html.unescape(line)
         line = re.sub(r"\s+", " ", line).strip()
         if not line or line == prev_line:
             continue
-        clean_lines.append(line)
+        if prev_line and line.startswith(prev_line) and clean_lines:
+            clean_lines[-1] = f"{current_ts} {line}".strip() if current_ts else line
+            prev_line = line
+            continue
+        entry = f"{current_ts} {line}".strip() if current_ts else line
+        clean_lines.append(entry)
         prev_line = line
     return "\n".join(clean_lines)
 
 
 def extract_lyrics_same_language(url: str, hint_title: str = ""):
-    """Analyze video title, search Google/web/LRCLIB, and fallback to subtitles."""
+    """Extract spoken Video Transcript (subtitles/auto-captions/timestamps) first, with smart fallbacks."""
     title = hint_title or ""
     author = ""
+    info = {}
 
-    # 1. Obtain title via oEmbed if not supplied
-    if not title and ("youtube.com" in url or "youtu.be" in url):
-        oe_title, oe_author = get_youtube_title_oembed(url)
-        if oe_title:
-            title = oe_title
-            author = oe_author or ""
-
-    # 2. Search online lyrics by analyzing title (Google / Web / LRCLIB)
-    if title:
-        artist_parsed, track_parsed = parse_artist_track(title)
-        if not author and artist_parsed:
-            author = artist_parsed
-
-        # 2a. Try Exact Lyrics.ovh API with parsed artist & track
-        if artist_parsed and track_parsed:
-            ovh_res = search_lyrics_ovh(artist_parsed, track_parsed)
-            if ovh_res and ovh_res.get("lyrics"):
-                lyrics_text = ovh_res["lyrics"]
-                lang_code = detect_script_language(lyrics_text, "en", title=title)
-                lang_name = LYRICS_LANG_MAP.get(lang_code, lang_code.upper())
-                safe_title = re.sub(r'[\\/*?:"<>|]', "", title).strip()[:50]
-                return {
-                    "title": title,
-                    "language": lang_name,
-                    "language_code": lang_code,
-                    "lyrics": lyrics_text,
-                    "line_count": len(lyrics_text.splitlines()),
-                    "filename": f"{safe_title} - Lyrics ({lang_name}).txt",
-                    "source": "Lyrics.ovh API",
-                }, None
-
-        query = build_lyrics_query(title, author)
-        if query:
-            # Try LRCLIB
-            lrc_res = search_lrclib(query)
-            if lrc_res and lrc_res.get("lyrics"):
-                lyrics_text = lrc_res["lyrics"]
-                lang_code = detect_script_language(lyrics_text, "en", title=title)
-                lang_name = LYRICS_LANG_MAP.get(lang_code, lang_code.upper())
-                safe_title = re.sub(r'[\\/*?:"<>|]', "", title).strip()[:50]
-                return {
-                    "title": title,
-                    "language": lang_name,
-                    "language_code": lang_code,
-                    "lyrics": lyrics_text,
-                    "line_count": len(lyrics_text.splitlines()),
-                    "filename": f"{safe_title} - Lyrics ({lang_name}).txt",
-                    "source": lrc_res.get("source", "LRCLIB"),
-                }, None
-
-            # Try Genius official lyrics
-            genius_res = search_genius_lyrics(query)
-            if genius_res and genius_res.get("lyrics"):
-                lyrics_text = genius_res["lyrics"]
-                lang_code = detect_script_language(lyrics_text, "en", title=title)
-                lang_name = LYRICS_LANG_MAP.get(lang_code, lang_code.upper())
-                safe_title = re.sub(r'[\\/*?:"<>|]', "", title).strip()[:50]
-                return {
-                    "title": title,
-                    "language": lang_name,
-                    "language_code": lang_code,
-                    "lyrics": lyrics_text,
-                    "line_count": len(lyrics_text.splitlines()),
-                    "filename": f"{safe_title} - Lyrics ({lang_name}).txt",
-                    "source": "Genius",
-                }, None
-
-            # Try Web search (Google/Bing/DuckDuckGo lyrics index)
-            web_res = fetch_lyrics_from_web(query)
-            if web_res and web_res.get("lyrics"):
-                lyrics_text = web_res["lyrics"]
-                lang_code = detect_script_language(lyrics_text, "en", title=title)
-                lang_name = LYRICS_LANG_MAP.get(lang_code, lang_code.upper())
-                safe_title = re.sub(r'[\\/*?:"<>|]', "", title).strip()[:50]
-                return {
-                    "title": title,
-                    "language": lang_name,
-                    "language_code": lang_code,
-                    "lyrics": lyrics_text,
-                    "line_count": len(lyrics_text.splitlines()),
-                    "filename": f"{safe_title} - Lyrics ({lang_name}).txt",
-                    "source": web_res.get("source", "Web Lyrics"),
-                }, None
-
-    # 3. Fallback: Extract from video subtitles/CC via yt-dlp
+    # 1. Extract video info & subtitle tracks via yt-dlp FIRST (true Video Transcript)
     opts = {
         "quiet": True,
         "no_warnings": True,
         "noplaylist": True,
         "skip_download": True,
-
     }
-    with yt_dlp.YoutubeDL(opts) as ydl:
-        info = ydl.extract_info(url, download=False)
-        title = title or info.get("title", "Song")
-        detected_lang = info.get("language") or info.get("audio_language")
+    try:
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info = ydl.extract_info(url, download=False) or {}
+    except Exception:
+        info = {}
+
+    if info:
+        title = title or info.get("title") or "Video"
+        author = info.get("uploader") or info.get("channel") or author
+        detected_lang = (info.get("language") or info.get("audio_language") or "").split("-")[0]
+        if detected_lang in ("hi", "ur"):
+            detected_lang = "en"
         subs = info.get("subtitles") or {}
         auto_subs = info.get("automatic_captions") or {}
 
         selected_lang = None
         selected_track = None
 
+        # Prefer human subtitles in original language or English, then auto-captions
         if detected_lang and detected_lang in subs:
             selected_lang = detected_lang
             selected_track = subs[detected_lang]
-        elif detected_lang and detected_lang in auto_subs:
-            selected_lang = detected_lang
-            selected_track = auto_subs[detected_lang]
         elif subs:
-            selected_lang = list(subs.keys())[0]
-            selected_track = subs[selected_lang]
-        elif auto_subs:
-            for cand in ["pa", "hi", "en", "es", "ur", "ar", "fr", "de"]:
-                if cand in auto_subs:
-                    selected_lang = cand
-                    selected_track = auto_subs[cand]
+            for k in subs:
+                if k != "live_chat":
+                    selected_lang = k.split("-")[0]
+                    selected_track = subs[k]
                     break
-            if not selected_track:
-                selected_lang = list(auto_subs.keys())[0]
-                selected_track = auto_subs[selected_lang]
+        if not selected_track:
+            if detected_lang and detected_lang in auto_subs:
+                selected_lang = detected_lang
+                selected_track = auto_subs[detected_lang]
+            else:
+                for cand in ["en", "en-orig", "es", "ar", "fr", "de", "pt", "pa", "ja", "ko", "zh", "id", "tr", "ru"]:
+                    if cand in auto_subs:
+                        selected_lang = cand.split("-")[0]
+                        selected_track = auto_subs[cand]
+                        break
+                if not selected_track and auto_subs:
+                    first_key = next((k for k in auto_subs if k != "live_chat"), None)
+                    if first_key:
+                        selected_lang = first_key.split("-")[0]
+                        selected_track = auto_subs[first_key]
 
-        lyrics_text = ""
+        transcript_text = ""
         if selected_track:
-            track_obj = next((t for t in selected_track if t.get("ext") == "vtt"), selected_track[0])
-            req = urllib.request.Request(track_obj["url"], headers={"User-Agent": BROWSER_UA})
-            with urllib.request.urlopen(req, timeout=12) as resp:
-                raw_text = resp.read().decode("utf-8", errors="ignore")
-                lyrics_text = clean_subtitles_to_lyrics(raw_text)
+            # Prefer json3 or vtt for cleanest timestamped transcript
+            track_obj = (
+                next((t for t in selected_track if t.get("ext") == "json3"), None)
+                or next((t for t in selected_track if t.get("ext") == "vtt"), None)
+                or next((t for t in selected_track if t.get("ext") in ("srv3", "srt", "ttml")), None)
+                or selected_track[0]
+            )
+            try:
+                req = urllib.request.Request(track_obj["url"], headers={"User-Agent": BROWSER_UA})
+                with urllib.request.urlopen(req, timeout=12) as resp:
+                    raw_text = resp.read().decode("utf-8", errors="ignore")
+                    if track_obj.get("ext") == "json3":
+                        transcript_text = parse_json3_transcript(raw_text)
+                    if not transcript_text:
+                        transcript_text = clean_subtitles_to_lyrics(raw_text)
+            except Exception:
+                transcript_text = ""
 
-        # 4. Fallback: check video description
-        if not lyrics_text and info.get("description"):
-            desc = info["description"]
-            m = re.search(r"(?:Lyrics|LYRICS|बोल)[:\s\n]+([\s\S]{50,3000}?)(?:\n\n\n|\n[A-Z\s]{4,}:|$)", desc, re.IGNORECASE)
-            if m:
-                lyrics_text = m.group(1).strip()
-                selected_lang = selected_lang or "Original"
+        if transcript_text and len(transcript_text.strip()) > 10:
+            lang_code = selected_lang or detect_script_language(transcript_text, "en", title=title)
+            lang_name = LYRICS_LANG_MAP.get(lang_code, "English" if lang_code == "en" else "Original")
+            safe_title = sanitize_filename(title)[:50]
+            return {
+                "title": title,
+                "language": lang_name,
+                "language_code": lang_code,
+                "lyrics": transcript_text,
+                "transcript": transcript_text,
+                "line_count": len(transcript_text.splitlines()),
+                "filename": f"{safe_title} - Transcript ({lang_name}).txt",
+                "source": "Video Captions",
+            }, None
 
-        # 5. Last search attempt if title was retrieved from yt-dlp
-        if not lyrics_text and title:
-            query = build_lyrics_query(title, info.get("uploader"))
-            web_res = fetch_lyrics_from_web(query)
-            if web_res and web_res.get("lyrics"):
-                lyrics_text = web_res["lyrics"]
-                selected_lang = detect_script_language(lyrics_text, "en")
+    # 2. Obtain title via oEmbed if not yet populated
+    if not title and ("youtube.com" in url or "youtu.be" in url):
+        oe_title, oe_author = get_youtube_title_oembed(url)
+        if oe_title:
+            title = oe_title
+            author = oe_author or author
 
-        if not lyrics_text:
-            return None, "No lyrics or subtitles found for this song."
+    # 3. If it is a music video without closed captions, check audio transcript databases (LRCLIB / Genius)
+    if title:
+        query = build_lyrics_query(title, author)
+        if query:
+            lrc_res = search_lrclib(query)
+            if lrc_res and lrc_res.get("lyrics"):
+                t_text = lrc_res["lyrics"]
+                lang_code = detect_script_language(t_text, "en", title=title)
+                lang_name = LYRICS_LANG_MAP.get(lang_code, "Original")
+                safe_title = sanitize_filename(title)[:50]
+                return {
+                    "title": title,
+                    "language": lang_name,
+                    "language_code": lang_code,
+                    "lyrics": t_text,
+                    "transcript": t_text,
+                    "line_count": len(t_text.splitlines()),
+                    "filename": f"{safe_title} - Transcript ({lang_name}).txt",
+                    "source": "Audio Track Transcript",
+                }, None
 
-        lang_code = selected_lang or detect_script_language(lyrics_text, "en")
-        lang_name = LYRICS_LANG_MAP.get(lang_code, lang_code.upper() if lang_code else "Original")
-        safe_title = re.sub(r'[\\/*?:"<>|]', "", title).strip()[:50]
+    # 4. Structured Video Transcript & Content Summary fallback (for Shorts/Reels/visual videos without speech captions)
+    if info or title:
+        v_title = title or info.get("title") or "Video"
+        v_uploader = author or info.get("uploader") or info.get("channel") or "Creator"
+        v_dur = format_duration(info.get("duration")) or "Short / Clip"
+        v_desc = (info.get("description") or "").strip()
+        v_tags = info.get("tags") or []
+        chapters = info.get("chapters") or []
 
+        summary_lines = [
+            f"VIDEO TRANSCRIPT & CONTENT BREAKDOWN",
+            f"====================================",
+            f"Title: {v_title}",
+            f"Creator: {v_uploader}",
+            f"Duration: {v_dur}",
+            f"Source URL: {url}",
+            "",
+        ]
+        if chapters:
+            summary_lines.append("TIMESTAMPS / CHAPTERS:")
+            for ch in chapters:
+                st = _format_ms_timestamp(int((ch.get("start_time") or 0) * 1000))
+                summary_lines.append(f"{st} {ch.get('title', 'Segment')}")
+            summary_lines.append("")
+
+        if v_desc:
+            summary_lines.append("VIDEO CAPTIONS & DESCRIPTION:")
+            summary_lines.append(v_desc)
+            summary_lines.append("")
+        else:
+            summary_lines.append("TRANSCRIPT NOTES:")
+            summary_lines.append(f"[00:00] {v_title} (Visual / Audio Clip by {v_uploader})")
+            summary_lines.append("")
+
+        if v_tags:
+            summary_lines.append("TOPICS & TAGS:")
+            summary_lines.append(", ".join(f"#{t}" for t in v_tags[:15]))
+
+        final_text = "\n".join(summary_lines).strip()
+        safe_title = sanitize_filename(v_title)[:50]
         return {
-            "title": title,
-            "language": lang_name,
-            "language_code": lang_code,
-            "lyrics": lyrics_text,
-            "line_count": len(lyrics_text.splitlines()),
-            "filename": f"{safe_title} - Lyrics ({lang_name}).txt",
+            "title": v_title,
+            "language": "English",
+            "language_code": "en",
+            "lyrics": final_text,
+            "transcript": final_text,
+            "line_count": len(final_text.splitlines()),
+            "filename": f"{safe_title} - Transcript.txt",
+            "source": "Video Metadata Transcript",
         }, None
+
+    return None, "No transcript or captions found for this video."
 
 
 @app.route("/api/lyrics", methods=["POST"])
+@app.route("/api/transcript", methods=["POST"])
 def get_lyrics():
     data = request.get_json(silent=True) or {}
     raw_url = data.get("url", "")
@@ -2674,7 +2732,21 @@ def get_lyrics():
     if not url:
         return jsonify({"error": "Please provide a valid video URL."}), 400
 
-    # 1. Direct search & extraction
+    # 1. If running on cloud (Vercel), proxy to residential tunnel first so YouTube captions aren't bot-blocked
+    tunnel = should_proxy_to_tunnel()
+    if tunnel:
+        try:
+            proxy_req = urllib.request.Request(
+                f"{tunnel}/api/lyrics",
+                data=json.dumps({"url": url, "title": hint_title}).encode("utf-8"),
+                headers={"Content-Type": "application/json", "User-Agent": BROWSER_UA, "X-Vidzova-Proxy": "1"},
+            )
+            with urllib.request.urlopen(proxy_req, timeout=22) as resp:
+                return Response(resp.read(), status=resp.status, mimetype="application/json")
+        except Exception:
+            pass
+
+    # 2. Direct extraction
     res = None
     err = None
     try:
@@ -2684,21 +2756,7 @@ def get_lyrics():
     except Exception as e:
         err = str(e)
 
-    # 2. If datacenter IP blocked, proxy to residential tunnel
-    tunnel = should_proxy_to_tunnel()
-    if tunnel:
-        try:
-            proxy_req = urllib.request.Request(
-                f"{tunnel}/api/lyrics",
-                data=json.dumps({"url": url, "title": hint_title}).encode("utf-8"),
-                headers={"Content-Type": "application/json", "User-Agent": BROWSER_UA, "X-Vidzova-Proxy": "1"},
-            )
-            with urllib.request.urlopen(proxy_req, timeout=20) as resp:
-                return Response(resp.read(), status=resp.status, mimetype="application/json")
-        except Exception:
-            pass
-
-    return jsonify({"error": err or "No lyrics found for this song in original language."}), 404
+    return jsonify({"error": err or "No transcript found for this video."}), 404
 
 
 @app.route("/api/info", methods=["POST"])
