@@ -6,7 +6,7 @@
 [![PWA](https://img.shields.io/badge/PWA-Installable-purple?style=for-the-badge)](https://vidzova.online/)
 
 > **Official Website:** [https://vidzova.online](https://vidzova.online/)  
-> **Vidzova** is a high-speed, privacy-first, free online media downloader and content suite. Download videos and high-bitrate audio from YouTube, Instagram, TikTok, Facebook, Twitter (X), Reddit, Vimeo, and 40+ supported platforms with zero pop-up ads, no invasive software, and no registration required.
+> **Vidzova** is a high-speed, privacy-first, free online media downloader and content suite. Download videos and high-bitrate audio from YouTube, Instagram, TikTok, Facebook, Twitter (X), Reddit, Vimeo, and 40+ supported platforms with no pop-up redirects, no invasive software, and no registration required.
 
 ---
 
@@ -28,7 +28,7 @@ Visit the live production site and specialized online tools:
 - **Multi-Resolution Support:** Download videos in 4K UHD, 1440p, 1080p Full HD, 720p HD, and 480p MP4.
 - **Crystal-Clear Audio Extraction:** Convert videos directly to MP3 and M4A at up to 320kbps.
 - **Multi-Platform Compatibility:** Full support for YouTube, Shorts, Instagram Reels, TikTok (no watermark), Facebook, Reddit, and Vimeo.
-- **Zero Annoyances:** No pop-under ads, no spammy notifications, and no browser extensions required.
+- **Zero Annoyances:** No pop-under redirects, no spammy notifications, and no browser extensions required.
 - **Progressive Web App (PWA):** Install Vidzova directly on your iPhone, Android, Windows, or Mac home screen for an app-like experience.
 - **Privacy First:** Download sessions are client-directed with end-to-end HTTPS encryption.
 

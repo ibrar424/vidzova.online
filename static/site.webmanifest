@@ -2,7 +2,7 @@
   "name": "Vidzova Online Video Downloader",
   "short_name": "Vidzova",
   "id": "/?source=pwa",
-  "description": "Fast & clean online video downloader for YouTube, TikTok, Instagram, Facebook, Twitter, and Pinterest with zero ads and no sign-up.",
+  "description": "Fast & clean online video downloader for YouTube, TikTok, Instagram, Facebook, Twitter, and Pinterest with no pop-ups and no sign-up.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
