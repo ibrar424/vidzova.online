@@ -1319,6 +1319,11 @@ def serve_robots():
     return send_from_directory(app.static_folder, "robots.txt", mimetype="text/plain")
 
 
+@app.route("/ads.txt")
+def serve_ads_txt():
+    return send_from_directory(app.static_folder, "ads.txt", mimetype="text/plain; charset=utf-8")
+
+
 @app.route("/llms.txt")
 def serve_llms():
     return send_from_directory(app.static_folder, "llms.txt", mimetype="text/plain; charset=utf-8")

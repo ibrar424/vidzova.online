@@ -21,3 +21,8 @@ Sitemap: https://www.vidzova.online/sitemap.xml
 
 # LLM & AI Discovery Standard
 # https://vidzova.online/llms.txt
+
+# Allow Google AdSense Crawler & ads.txt
+User-agent: Mediapartners-Google
+Allow: /
+Allow: /ads.txt
