@@ -10,7 +10,8 @@ import threading
 import tempfile
 import urllib.request
 import urllib.parse
-from flask import Flask, request, jsonify, send_file, send_from_directory, Response
+import urllib.error
+from flask import Flask, request, jsonify, send_file, send_from_directory, Response, redirect, after_this_request
 from flask_cors import CORS
 import yt_dlp
 
@@ -1507,19 +1508,43 @@ def api_extract_scenes():
     })
 
 
+_tunnel_health_cache = {"url": None, "ok": False, "ts": 0}
+
 def should_proxy_to_tunnel():
-    """Detect if running on cloud (Vercel) and proxy through residential tunnel."""
+    """Detect if running on cloud (Vercel) and proxy through residential tunnel IF configured and responsive."""
     if request.headers.get("X-Vidzova-Proxy") == "1":
         return None
     host = (request.host or "").lower()
     if "trycloudflare.com" in host or "127.0.0.1" in host or "localhost" in host:
         return None
     is_cloud = bool(os.environ.get("VERCEL")) or ("vidzova.online" in host) or ("vercel.app" in host)
-    if is_cloud:
-        tunnel = (os.environ.get("TUNNEL_URL") or "https://smoking-streets-betty-festivals.trycloudflare.com").strip()
-        if tunnel and tunnel.startswith("http"):
-            return tunnel.rstrip("/")
-    return None
+    if not is_cloud:
+        return None
+
+    tunnel = (os.environ.get("TUNNEL_URL") or "").strip()
+    if not tunnel or not tunnel.startswith("http"):
+        return None
+
+    tunnel = tunnel.rstrip("/")
+    now = time.time()
+    if _tunnel_health_cache["url"] == tunnel and (now - _tunnel_health_cache["ts"] < 30):
+        return tunnel if _tunnel_health_cache["ok"] else None
+
+    try:
+        ping_req = urllib.request.Request(
+            f"{tunnel}/api/config",
+            headers={"User-Agent": BROWSER_UA, "X-Vidzova-Proxy": "1"},
+        )
+        with urllib.request.urlopen(ping_req, timeout=1.5) as ping_res:
+            is_ok = (ping_res.status == 200)
+    except Exception:
+        is_ok = False
+
+    _tunnel_health_cache["url"] = tunnel
+    _tunnel_health_cache["ok"] = is_ok
+    _tunnel_health_cache["ts"] = now
+
+    return tunnel if is_ok else None
 
 
 @app.route("/api/proxy-video", methods=["GET", "HEAD", "OPTIONS"])
@@ -2930,7 +2955,7 @@ def get_video_info():
 
     if info is None:
         # 1. If datacenter extraction failed, proxy to residential tunnel FIRST for full streams & direct URLs
-        tunnel = (os.environ.get("TUNNEL_URL") or "https://smoking-streets-betty-festivals.trycloudflare.com").strip()
+        tunnel = (os.environ.get("TUNNEL_URL") or "").strip()
         if tunnel and "127.0.0.1" not in request.host and "localhost" not in request.host:
             try:
                 proxy_req = urllib.request.Request(
@@ -3794,7 +3819,7 @@ def get_public_config():
             "SUPABASE_ANON_KEY",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhdmlwbXBlZWd4aGt1eWhyaHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4NzEwMDcsImV4cCI6MjEwODQ0NzAwN30.u1VIOKaURK2uBASIzzQhAqXBrAF5njwSivwOYPO_wuI",
         ),
-        "tunnel_url": os.environ.get("TUNNEL_URL", "https://smoking-streets-betty-festivals.trycloudflare.com"),
+        "tunnel_url": os.environ.get("TUNNEL_URL", ""),
     })
 
 
