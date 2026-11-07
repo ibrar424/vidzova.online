@@ -104,14 +104,28 @@ def get_base_ydl_opts():
             pass
     elif os.path.exists("cookies.txt"):
         opts["cookiefile"] = "cookies.txt"
-    # Residential/rotating proxy (e.g. http://user:pass@host:port) so YouTube does not
-    # bot-block Vercel datacenter IPs. Set YTDLP_PROXY in Vercel env vars.
-    proxy_env = (os.environ.get("YTDLP_PROXY") or os.environ.get("PROXY_URL") or "").strip()
-    if proxy_env:
-        opts["proxy"] = proxy_env
+    proxy_list = get_proxy_list()
+    if proxy_list:
+        opts["proxy"] = proxy_list[_ACTIVE_PROXY_IDX[0] % len(proxy_list)]
     if FFMPEG_PATH:
         opts["ffmpeg_location"] = FFMPEG_PATH
     return opts
+
+
+_ACTIVE_PROXY_IDX = [0]
+
+
+def get_proxy_list():
+    """Return list of configured proxies from YTDLP_PROXY (supports comma-separated failover pool)."""
+    raw = (os.environ.get("YTDLP_PROXY") or os.environ.get("PROXY_URL") or "").strip()
+    if not raw:
+        return []
+    return [x.strip() for x in raw.split(",") if x.strip()]
+
+
+def advance_proxy():
+    """Advance to next proxy in pool on failure."""
+    _ACTIVE_PROXY_IDX[0] += 1
 
 
 def is_pinterest_url(url: str) -> bool:
@@ -2915,12 +2929,19 @@ def get_video_info():
 
     info = None
     ydl_error = None
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-    except Exception as e:
-        ydl_error = re.sub(r"\x1b\[[0-9;]*m", "", str(e))
-        # Retry with visionos and android client if initial extraction failed
+    max_info_tries = max(1, min(len(get_proxy_list()), 4))
+    for _info_try in range(max_info_tries):
+        try:
+            cur_opts = get_base_ydl_opts()
+            cur_opts["extract_flat"] = False
+            with yt_dlp.YoutubeDL(cur_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+            if info:
+                break
+        except Exception as e:
+            ydl_error = re.sub(r"\x1b\[[0-9;]*m", "", str(e))
+            advance_proxy()
+    if info is None:
         try:
             vr_opts = get_base_ydl_opts()
             vr_opts["extract_flat"] = False
@@ -3575,14 +3596,20 @@ def download_stream():
 
     try:
         last_exc = None
-        for _attempt in range(3):
+        max_dl_tries = max(2, min(len(get_proxy_list()), 4))
+        for _attempt in range(max_dl_tries):
             try:
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                cur_dl_opts = dict(ydl_opts)
+                plist = get_proxy_list()
+                if plist:
+                    cur_dl_opts["proxy"] = plist[_ACTIVE_PROXY_IDX[0] % len(plist)]
+                with yt_dlp.YoutubeDL(cur_dl_opts) as ydl:
                     ydl.download([url])
                 last_exc = None
                 break
             except Exception as att_e:
                 last_exc = att_e
+                advance_proxy()
                 for leftover in os.listdir(job_dir):
                     try:
                         os.remove(os.path.join(job_dir, leftover))
@@ -3677,28 +3704,6 @@ def start_download():
     host = (request.host or "").lower()
     is_cloud = bool(os.environ.get("VERCEL")) or ("vidzova.online" in host) or ("vercel.app" in host)
     if is_cloud:
-        if not direct_url:
-            preflight_err = None
-            for pf_client in (None, ["tv", "web_safari"], None, ["android", "android_embedded", "web_embedded"]):
-                try:
-                    pf_opts = get_base_ydl_opts()
-                    pf_opts["skip_download"] = True
-                    if pf_client:
-                        pf_opts["extractor_args"] = {"youtube": {"player_client": pf_client}}
-                    with yt_dlp.YoutubeDL(pf_opts) as ydl:
-                        ydl.extract_info(url, download=False)
-                    preflight_err = None
-                    break
-                except Exception as pf_e:
-                    preflight_err = re.sub(r"\x1b\[[0-9;]*m", "", str(pf_e))
-            if preflight_err:
-                if "not a bot" in preflight_err or "cookies" in preflight_err.lower():
-                    msg = ("YouTube is temporarily blocking our server for this video. "
-                           "Please try again in a few minutes or try another video.")
-                else:
-                    msg = f"Download failed: {preflight_err[:200]}"
-                return jsonify({"error": msg, "detail": preflight_err[:300],
-                                "proxy": bool(os.environ.get("YTDLP_PROXY"))}), 503
         encoded_url = urllib.parse.quote(url, safe="")
         encoded_fmt = urllib.parse.quote(format_id, safe="")
         encoded_title = urllib.parse.quote(safe_title, safe="")
