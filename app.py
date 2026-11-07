@@ -2217,12 +2217,6 @@ def faq_page():
     return send_from_directory(app.static_folder, "faq.html")
 
 
-@app.route("/savefrom-alternative", strict_slashes=False)
-@app.route("/savefrom-net-alternative", strict_slashes=False)
-def savefrom_alternative_page():
-    return send_from_directory(app.static_folder, "savefrom-alternative.html")
-
-
 @app.route("/y2mate-alternative", strict_slashes=False)
 def y2mate_alternative_page():
     return send_from_directory(app.static_folder, "y2mate-alternative.html")
@@ -2277,7 +2271,6 @@ def page_not_found(e):
   <p style="font-size:1.05rem; margin:0 0 28px; color:#94a3b8; max-width:480px; line-height:1.6;">The page you are looking for does not exist or has been moved. Explore our free video tools below:</p>
   <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
     <a href="/" style="background:#00b956; color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:700;">Home Downloader</a>
-    <a href="/savefrom-alternative" style="background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:700;">SaveFrom Alternative</a>
     <a href="/faq" style="background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:700;">FAQ</a>
   </div>
 </body>
