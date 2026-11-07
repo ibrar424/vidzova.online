@@ -3574,8 +3574,22 @@ def download_stream():
         ydl_opts["postprocessor_args"] = {"Merger": ["-threads", "0", "-c", "copy"]}
 
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
+        last_exc = None
+        for _attempt in range(3):
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([url])
+                last_exc = None
+                break
+            except Exception as att_e:
+                last_exc = att_e
+                for leftover in os.listdir(job_dir):
+                    try:
+                        os.remove(os.path.join(job_dir, leftover))
+                    except Exception:
+                        pass
+        if last_exc:
+            raise last_exc
     except Exception as e:
         # Resilient fallback with embedded and android client
         try:
@@ -3665,7 +3679,7 @@ def start_download():
     if is_cloud:
         if not direct_url:
             preflight_err = None
-            for pf_client in (None, ["android", "android_embedded", "web_embedded"]):
+            for pf_client in (None, ["tv", "web_safari"], None, ["android", "android_embedded", "web_embedded"]):
                 try:
                     pf_opts = get_base_ydl_opts()
                     pf_opts["skip_download"] = True
@@ -3683,7 +3697,8 @@ def start_download():
                            "Please try again in a few minutes or try another video.")
                 else:
                     msg = f"Download failed: {preflight_err[:200]}"
-                return jsonify({"error": msg}), 503
+                return jsonify({"error": msg, "detail": preflight_err[:300],
+                                "proxy": bool(os.environ.get("YTDLP_PROXY"))}), 503
         encoded_url = urllib.parse.quote(url, safe="")
         encoded_fmt = urllib.parse.quote(format_id, safe="")
         encoded_title = urllib.parse.quote(safe_title, safe="")
