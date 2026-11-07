@@ -104,6 +104,11 @@ def get_base_ydl_opts():
             pass
     elif os.path.exists("cookies.txt"):
         opts["cookiefile"] = "cookies.txt"
+    # Residential/rotating proxy (e.g. http://user:pass@host:port) so YouTube does not
+    # bot-block Vercel datacenter IPs. Set YTDLP_PROXY in Vercel env vars.
+    proxy_env = (os.environ.get("YTDLP_PROXY") or os.environ.get("PROXY_URL") or "").strip()
+    if proxy_env:
+        opts["proxy"] = proxy_env
     if FFMPEG_PATH:
         opts["ffmpeg_location"] = FFMPEG_PATH
     return opts
@@ -3658,6 +3663,27 @@ def start_download():
     host = (request.host or "").lower()
     is_cloud = bool(os.environ.get("VERCEL")) or ("vidzova.online" in host) or ("vercel.app" in host)
     if is_cloud:
+        if not direct_url:
+            preflight_err = None
+            for pf_client in (None, ["android", "android_embedded", "web_embedded"]):
+                try:
+                    pf_opts = get_base_ydl_opts()
+                    pf_opts["skip_download"] = True
+                    if pf_client:
+                        pf_opts["extractor_args"] = {"youtube": {"player_client": pf_client}}
+                    with yt_dlp.YoutubeDL(pf_opts) as ydl:
+                        ydl.extract_info(url, download=False)
+                    preflight_err = None
+                    break
+                except Exception as pf_e:
+                    preflight_err = re.sub(r"\x1b\[[0-9;]*m", "", str(pf_e))
+            if preflight_err:
+                if "not a bot" in preflight_err or "cookies" in preflight_err.lower():
+                    msg = ("YouTube is temporarily blocking our server for this video. "
+                           "Please try again in a few minutes or try another video.")
+                else:
+                    msg = f"Download failed: {preflight_err[:200]}"
+                return jsonify({"error": msg}), 503
         encoded_url = urllib.parse.quote(url, safe="")
         encoded_fmt = urllib.parse.quote(format_id, safe="")
         encoded_title = urllib.parse.quote(safe_title, safe="")
