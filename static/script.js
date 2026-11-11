@@ -174,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Centralized platform switcher: shows ONLY the selected category badge & dialog box content
-  function setActivePlatform(platform, focusInput = true, updateUrl = true) {
+  function setActivePlatform(platform, focusInput = true, updateUrl = true, isInitialLoad = false) {
     document.querySelectorAll("[data-platform]").forEach((el) => {
       if (
         el.classList.contains("sf-nav-link") ||
@@ -236,6 +236,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (helperTipText) {
       helperTipText.textContent = "";
+    }
+
+    if (isInitialLoad) {
+      return;
     }
 
     if (platform === "YouTube") {
@@ -428,9 +432,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // Handle all platform buttons/links: automatically clear pasted URL & errors on switch
   document.querySelectorAll("[data-platform]").forEach((el) => {
     el.addEventListener("click", (e) => {
-      e.preventDefault();
       const platform = e.currentTarget.dataset.platform;
+      const href = e.currentTarget.getAttribute("href");
+      if (href && href.startsWith("/")) {
+        return; // Allow standard navigation to dedicated server-rendered SEO page
+      }
+      e.preventDefault();
       if (platform) {
+        const targetPath = PLATFORM_PATHS[platform];
+        if (targetPath && window.location.pathname !== targetPath) {
+          window.location.href = targetPath;
+          return;
+        }
         clearAllInputAndResults();
         setActivePlatform(platform, true, true);
       }
@@ -544,7 +557,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Detect initial platform from SEO URL path and record state
   const initialPlatform = getPlatformFromPath(window.location.pathname);
   window.history.replaceState({ platform: initialPlatform }, "", window.location.pathname);
-  setActivePlatform(initialPlatform, false, false);
+  setActivePlatform(initialPlatform, false, false, true);
 
   // When user clicks browser Back button:
   // Automatically clear any old pasted URL, clear error alerts, and show the target page cleanly

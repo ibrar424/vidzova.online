@@ -36,9 +36,7 @@ def add_no_cache_headers(response):
         request.path in ("/", "/scene-extractor", "/video-scene-extractor", "/one-video-five-social-posts", "/one-video-5-social-posts", "/video-to-social-posts", "/video-scene-detection", "/video-keyframes-extractor", "/download-from-pinterest", "/amazon-video-downloader", "/alibaba-video-downloader", "/youtube-video-downloader", "/pinterest-video-downloader", "/facebook-video-downloader", "/instagram-video-downloader", "/tiktok-video-downloader", "/twitter-video-downloader", "/youtube-to-mp3", "/snapchat-video-downloader", "/download-from-snapchat")
         or request.path.endswith((".html", ".css", ".js"))
     ):
-        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-        response.headers["Pragma"] = "no-cache"
-        response.headers["Expires"] = "0"
+        response.headers["Cache-Control"] = "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400"
     elif request.path.endswith((".ico", ".png", ".svg", ".webmanifest")):
         response.headers["Cache-Control"] = "public, max-age=604800, immutable"
     return response
@@ -1285,13 +1283,45 @@ def render_seo_page(req_path):
     content = content.replace('class="sf-resource-pill active" data-platform="YouTube"', 'class="sf-resource-pill" data-platform="YouTube"')
     content = content.replace(f'data-platform="{cfg["platform"]}"', f'data-platform="{cfg["platform"]}"')
 
-    # Show only the current feature section
+    # Show only the current feature section and remove non-matching sections on dedicated platform pages
+    active_feat_id = cfg["feature_id"]
+    seen_feats = set()
     for k, item in SEO_PAGES.items():
         feat_id = item["feature_id"]
-        if k == key:
+        if feat_id in seen_feats:
+            continue
+        seen_feats.add(feat_id)
+        if feat_id == active_feat_id:
             content = content.replace(f'id="{feat_id}" class="sf-pinterest-section hidden"', f'id="{feat_id}" class="sf-pinterest-section"')
         else:
-            content = content.replace(f'id="{feat_id}" class="sf-pinterest-section"', f'id="{feat_id}" class="sf-pinterest-section hidden"')
+            content = re.sub(
+                rf'\s*<section id="{re.escape(feat_id)}" class="sf-pinterest-section(?: hidden)?">[\s\S]*?</section>',
+                "",
+                content,
+                count=1,
+            )
+
+    # Render platform-specific visible FAQ items matching FAQPage JSON-LD
+    faq_items_html = []
+    for idx_q, (q, a) in enumerate(cfg["faq"]):
+        open_attr = " open" if idx_q == 0 else ""
+        faq_items_html.append(
+            f'          <details class="sf-faq-item"{open_attr}>\n'
+            f'            <summary>{html.escape(q)}</summary>\n'
+            f'            <p>{html.escape(a)}</p>\n'
+            f'          </details>'
+        )
+    faq_block = "\n".join(faq_items_html)
+    content = content.replace(
+        '<h2 class="sf-section-title">Frequently Asked Questions About Video Downloader</h2>',
+        f'<h2 class="sf-section-title">Frequently Asked Questions About {html.escape(cfg["keyword"])}</h2>',
+    )
+    content = re.sub(
+        r'<div class="sf-faq-list">[\s\S]*?</div>\s*</div>\s*</section>',
+        f'<div class="sf-faq-list">\n{faq_block}\n        </div>\n      </div>\n    </section>',
+        content,
+        count=1,
+    )
 
     return Response(content, mimetype="text/html")
 
