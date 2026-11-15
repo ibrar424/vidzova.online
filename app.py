@@ -1260,8 +1260,26 @@ def render_seo_page(req_path):
     content = re.sub(r'<h1 id="heroTitle">.*?</h1>', f'<h1 id="heroTitle">{cfg["h1"]}</h1>', content, count=1)
     content = re.sub(r'<p id="heroSubtitle" class="sf-hero-sub">.*?</p>', f'<p id="heroSubtitle" class="sf-hero-sub">{cfg["subtitle"]}</p>', content, count=1)
 
-    # 5. Keyword in H2 (Tip 3)
+    # 5. Keyword in H2 & Platform-Specific 3-Step Instructions (Tip 3)
     content = re.sub(r'<h2 id="howToHeading" class="sf-section-title">.*?</h2>', f'<h2 id="howToHeading" class="sf-section-title">How to Download {cfg["platform"]} Videos in 3 Easy Steps</h2>', content, count=1)
+    content = re.sub(
+        r'<h3 id="step1Title">.*?</h3>\s*<p id="step1Desc">.*?</p>',
+        f'<h3 id="step1Title">Copy the {cfg["platform"]} Link</h3>\n            <p id="step1Desc">Open {cfg["platform"]} in your browser or mobile app and copy the URL of the public {cfg["platform"]} video or clip you want to save.</p>',
+        content,
+        count=1,
+    )
+    content = re.sub(
+        r'<h3 id="step2Title">.*?</h3>\s*<p id="step2Desc">.*?</p>',
+        f'<h3 id="step2Title">Paste into {cfg["keyword"]}</h3>\n            <p id="step2Desc">Paste the copied {cfg["platform"]} URL into the input box at the top of this {cfg["keyword"].lower()} page and click <strong>Download</strong>.</p>',
+        content,
+        count=1,
+    )
+    content = re.sub(
+        r'<h3 id="step3Title">.*?</h3>\s*<p id="step3Desc">.*?</p>',
+        f'<h3 id="step3Title">Choose {cfg["platform"]} Quality &amp; Save</h3>\n            <p id="step3Desc">Select your preferred {cfg["platform"]} output stream (Full HD 1080p MP4, 720p, 4K, or MP3 audio) to download directly to your device.</p>',
+        content,
+        count=1,
+    )
 
     # 6. Keyword in Image Alt Text (Tip 4)
     content = content.replace('alt="Online Video Downloader Media Thumbnail"', f'alt="{cfg["keyword"]} Media Thumbnail"')
@@ -1322,6 +1340,44 @@ def render_seo_page(req_path):
         content,
         count=1,
     )
+
+    # On dedicated platform pages (key != "home"), remove homepage-only boilerplate sections
+    # so each URL has a high ratio of unique, platform-specific content for Google indexing.
+    if key != "home":
+        content = re.sub(
+            r'\s*<!-- Supported Resources Section -->\s*<section class="sf-resources-section">[\s\S]*?</section>',
+            "",
+            content,
+            count=1,
+        )
+        content = re.sub(
+            r'\s*<!-- Dedicated SEO Internal Linking Hub & Multi-Platform Directory -->\s*<section class="sf-directory-section" id="tools-directory">[\s\S]*?</section>',
+            "",
+            content,
+            count=1,
+        )
+        spec_section = f"""
+    <section class="sf-howto-section" id="{key}-specs">
+      <div class="sf-container">
+        <h2 class="sf-section-title">{html.escape(cfg["keyword"])} Technical Specifications &amp; Supported Formats</h2>
+        <p class="sf-section-subtitle">{html.escape(cfg["description"])}</p>
+        <div class="sf-steps-grid">
+          <div class="sf-step-card">
+            <h3>Supported {html.escape(cfg["platform"])} Formats</h3>
+            <p>Our {html.escape(cfg["keyword"].lower())} processes native {html.escape(cfg["platform"])} video streams into universal H.264/AAC MP4 containers (360p, 720p HD, 1080p Full HD, and up to 4K Ultra HD where available) plus high-bitrate MP3/M4A audio tracks.</p>
+          </div>
+          <div class="sf-step-card">
+            <h3>Cross-Device Compatibility</h3>
+            <p>Save {html.escape(cfg["platform"])} media directly in mobile Safari on iPhone/iPad, Google Chrome on Android, and desktop browsers on Windows, macOS, and Linux without installing third-party extensions or software.</p>
+          </div>
+          <div class="sf-step-card">
+            <h3>Privacy &amp; Copyright Compliance</h3>
+            <p>Vidzova processes public {html.escape(cfg["platform"])} links on demand without requiring account login credentials or storing personal download histories. Only download {html.escape(cfg["platform"])} content you own or have permission to save.</p>
+          </div>
+        </div>
+      </div>
+    </section>"""
+        content = content.replace('<!-- FAQ Section -->', spec_section + '\n\n    <!-- FAQ Section -->', 1)
 
     return Response(content, mimetype="text/html")
 
@@ -2245,6 +2301,12 @@ def contact_page():
 @app.route("/faq", strict_slashes=False)
 def faq_page():
     return send_from_directory(app.static_folder, "faq.html")
+
+
+@app.route("/savefrom-alternative", strict_slashes=False)
+@app.route("/savefrom-net-alternative", strict_slashes=False)
+def savefrom_redirect():
+    return redirect("/", code=301)
 
 
 @app.route("/y2mate-alternative", strict_slashes=False)
