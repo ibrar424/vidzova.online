@@ -3774,12 +3774,29 @@ def download_stream():
         except Exception:
             pass
 
-    # FAST PATH 2: Single-stream format cached from /api/info (e.g. progressive MP4 '18' or M4A audio) -> Zero re-extraction, instant streaming!
+    # FAST PATH 2: Single-stream format (e.g. progressive MP4 '18', M4A audio, or social MP4) -> Instant chunked streaming (zero /tmp buffering)!
     needs_merge = ("+" in format_id) or ("bestvideo" in format_id) or ("mp3" in format_id)
     if not needs_merge and url:
+        f_entry = None
         cached = _cache_get_info(url)
         if cached and format_id in cached.get("fmt_urls", {}):
             f_entry = cached["fmt_urls"][format_id]
+        else:
+            # Stateless fast extract across Vercel containers (gets direct stream URL in ~2s instead of buffering whole file to /tmp)
+            try:
+                ex_opts = get_base_ydl_opts()
+                ex_opts["format"] = format_id
+                with yt_dlp.YoutubeDL(ex_opts) as ydl:
+                    ex_info = ydl.extract_info(url, download=False)
+                if ex_info and ex_info.get("url") and not str(ex_info.get("url")).endswith(".m3u8"):
+                    f_entry = {
+                        "url": ex_info["url"],
+                        "headers": ex_info.get("http_headers") or {},
+                        "ext": (ex_info.get("ext") or ext_out).lower(),
+                    }
+            except Exception:
+                pass
+        if f_entry and f_entry.get("url"):
             try:
                 use_px = "googlevideo.com" in f_entry["url"]
                 return _stream_remote_media(
