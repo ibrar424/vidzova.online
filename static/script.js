@@ -941,6 +941,37 @@ document.addEventListener("DOMContentLoaded", () => {
           !selectedFormat.direct_url.includes("googlevideo.com") &&
           !selectedFormat.direct_url.includes(".m3u8");
 
+        const isCloudHost =
+          window.location.hostname.includes("vidzova.online") ||
+          window.location.hostname.includes("vercel.app");
+
+        // Zero-round-trip instant stream trigger on cloud (saves ~1s per download)
+        if (isCloudHost) {
+          const safeExt = (selectedFormat.ext || "mp4").toLowerCase();
+          const params = new URLSearchParams({
+            url: currentVideo.webpage_url || "",
+            format_id: selectedFormat.format_id || "best",
+            title: currentVideo.title || "video",
+            ext: safeExt,
+          });
+          if (isDirectMedia) {
+            params.set("direct_url", selectedFormat.direct_url);
+          }
+          const instantUrl = `${activeApiBase}/api/download-stream?${params.toString()}`;
+          progressStatusText.textContent = `Downloading "${currentVideo.title || 'video'}.${safeExt}"...`;
+          progressPercentText.textContent = "100%";
+          progressBarFill.style.width = "100%";
+          progressBytesText.textContent = isDirectMedia ? "Instant direct stream started..." : "High-speed server stream started...";
+          mainDownloadBtn.disabled = false;
+          const a = document.createElement("a");
+          a.href = instantUrl;
+          a.download = `${currentVideo.title || "download"}.${safeExt}`;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => a.remove(), 500);
+          return;
+        }
+
         const res = await fetch(`${activeApiBase}/api/download-start`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

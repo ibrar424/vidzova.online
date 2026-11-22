@@ -11,7 +11,7 @@ import tempfile
 import urllib.request
 import urllib.parse
 import urllib.error
-from flask import Flask, request, jsonify, send_file, send_from_directory, Response, redirect, after_this_request
+from flask import Flask, request, jsonify, send_file, send_from_directory, Response, redirect, after_this_request, stream_with_context
 from flask_cors import CORS
 import yt_dlp
 
@@ -27,18 +27,21 @@ CORS(app)
 
 @app.after_request
 def add_no_cache_headers(response):
-    """Ensure browser always loads latest HTML, CSS, and JS and allow Private Network Access."""
+    """Enable fast Vercel/Cloudflare Edge CDN caching for HTML/assets and allow Private Network Access."""
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     response.headers["Access-Control-Allow-Private-Network"] = "true"
-    if (
-        request.path in ("/", "/scene-extractor", "/video-scene-extractor", "/one-video-five-social-posts", "/one-video-5-social-posts", "/video-to-social-posts", "/video-scene-detection", "/video-keyframes-extractor", "/download-from-pinterest", "/amazon-video-downloader", "/alibaba-video-downloader", "/youtube-video-downloader", "/pinterest-video-downloader", "/facebook-video-downloader", "/instagram-video-downloader", "/tiktok-video-downloader", "/twitter-video-downloader", "/youtube-to-mp3", "/snapchat-video-downloader", "/download-from-snapchat")
-        or request.path.endswith((".html", ".css", ".js"))
-    ):
-        response.headers["Cache-Control"] = "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400"
-    elif request.path.endswith((".ico", ".png", ".svg", ".webmanifest")):
-        response.headers["Cache-Control"] = "public, max-age=604800, immutable"
+    p = request.path or ""
+    if p.endswith((".css", ".js")) and p != "/sw.js":
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        response.headers["Vercel-CDN-Cache-Control"] = "public, s-maxage=31536000, immutable"
+    elif p.endswith((".ico", ".png", ".svg", ".webmanifest", ".webp", ".woff2")):
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        response.headers["Vercel-CDN-Cache-Control"] = "public, s-maxage=31536000, immutable"
+    elif request.method == "GET" and not p.startswith("/api/") and response.mimetype == "text/html" and response.status_code == 200:
+        response.headers["Cache-Control"] = "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400"
+        response.headers["Vercel-CDN-Cache-Control"] = "public, s-maxage=3600, stale-while-revalidate=86400"
     return response
 
 
@@ -77,19 +80,52 @@ def get_ffmpeg_path():
 FFMPEG_PATH = get_ffmpeg_path()
 
 
+_INFO_CACHE = {}
+_INFO_CACHE_LOCK = threading.Lock()
+_INFO_CACHE_TTL = 600  # 10 minutes
+
+
+def _cache_get_info(url_key):
+    now = time.time()
+    with _INFO_CACHE_LOCK:
+        entry = _INFO_CACHE.get(url_key)
+        if entry and (now - entry["ts"] < _INFO_CACHE_TTL):
+            return entry
+        if entry:
+            _INFO_CACHE.pop(url_key, None)
+    return None
+
+
+def _cache_set_info(url_key, payload, fmt_url_map=None):
+    now = time.time()
+    with _INFO_CACHE_LOCK:
+        if len(_INFO_CACHE) > 200:
+            oldest = sorted(_INFO_CACHE.items(), key=lambda kv: kv[1]["ts"])[:50]
+            for k, _ in oldest:
+                _INFO_CACHE.pop(k, None)
+        _INFO_CACHE[url_key] = {
+            "ts": now,
+            "payload": payload,
+            "fmt_urls": fmt_url_map or {},
+        }
+
+
 def get_base_ydl_opts():
-    """Return high-speed yt-dlp options with chunking and concurrent fragment downloads."""
+    """Return maximum-speed yt-dlp options with 16 parallel fragment threads and 1MB socket buffer."""
     opts = {
         "quiet": True,
         "no_warnings": True,
+        "no_color": True,
+        "noprogress": True,
         "noplaylist": True,
+        "cachedir": False,
+        "socket_timeout": 15,
         "js_runtimes": {"node": {}},
         "http_chunk_size": 10485760,  # 10MB chunking bypasses YouTube 50KB/s throttle
-        "concurrent_fragment_downloads": 8,  # Download DASH/HLS segments in 8 parallel threads
-        "buffersize": 1024 * 128,  # 128KB socket buffer
-        "retries": 10,
-        "fragment_retries": 10,
-
+        "concurrent_fragment_downloads": 16,  # 16 parallel threads for DASH/HLS segments
+        "buffersize": 1024 * 1024,  # 1MB socket buffer for maximum throughput
+        "retries": 5,
+        "fragment_retries": 5,
     }
     cookies_env = os.environ.get("YOUTUBE_COOKIES") or os.environ.get("COOKIES_DATA")
     if cookies_env:
@@ -2973,6 +3009,10 @@ def get_video_info():
     if not url:
         return jsonify({"error": "Please enter a valid video or product URL."}), 400
 
+    cached_info = _cache_get_info(url)
+    if cached_info and cached_info.get("payload"):
+        return jsonify(cached_info["payload"])
+
     # Fast tunnel proxy for Cloud / Vercel to prevent datacenter IP bot block and lambda timeout
     tunnel = should_proxy_to_tunnel()
     if tunnel and not (is_amazon_url(raw_url) or is_amazon_url(url) or is_alibaba_url(url)):
@@ -3385,7 +3425,7 @@ def get_video_info():
             "badge": "HD",
         })
 
-    return jsonify({
+    resp_payload = {
         "id": info.get("id"),
         "title": info.get("title") or "Untitled Video",
         "uploader": info.get("uploader") or info.get("channel") or ("Pinterest Creator" if is_pin else "Creator"),
@@ -3401,7 +3441,21 @@ def get_video_info():
             "video_only": video_only_formats[:8],
             "audio": audio_only_formats[:8],
         }
-    })
+    }
+    fmt_url_map = {}
+    for rf in raw_formats:
+        fid = str(rf.get("format_id") or "")
+        furl = rf.get("url") or ""
+        if fid and furl and not furl.endswith(".m3u8") and "manifest" not in furl:
+            fmt_url_map[fid] = {
+                "url": furl,
+                "headers": rf.get("http_headers") or {},
+                "ext": (rf.get("ext") or "mp4").lower(),
+            }
+    _cache_set_info(url, resp_payload, fmt_url_map)
+    if resp_payload["webpage_url"] and resp_payload["webpage_url"] != url:
+        _cache_set_info(resp_payload["webpage_url"], resp_payload, fmt_url_map)
+    return jsonify(resp_payload)
 
 
 def download_direct_media(job_id: str, media_url: str, job_dir: str, safe_title: str, ext_hint: str):
@@ -3644,9 +3698,54 @@ def run_download_job(job_id: str, url: str, format_id: str, title: str, ext_hint
 
 
 
+def _stream_remote_media(media_url, filename, extra_headers=None, use_proxy=False):
+    """Stream a remote media URL directly to the client in 256KB chunks (zero /tmp buffering)."""
+    req_headers = {"User-Agent": BROWSER_UA, "Accept": "*/*"}
+    if extra_headers:
+        for k, v in extra_headers.items():
+            if k.lower() not in ("host", "accept-encoding", "content-length"):
+                req_headers[k] = v
+
+    opener = urllib.request.build_opener()
+    if use_proxy:
+        plist = get_proxy_list()
+        if plist:
+            px = plist[_ACTIVE_PROXY_IDX[0] % len(plist)]
+            opener = urllib.request.build_opener(urllib.request.ProxyHandler({"http": px, "https": px}))
+
+    upstream_req = urllib.request.Request(media_url, headers=req_headers)
+    upstream_resp = opener.open(upstream_req, timeout=20)
+
+    content_type = upstream_resp.headers.get("Content-Type") or "application/octet-stream"
+    content_length = upstream_resp.headers.get("Content-Length")
+
+    def generate():
+        try:
+            while True:
+                chunk = upstream_resp.read(262144)  # 256KB streaming chunks
+                if not chunk:
+                    break
+                yield chunk
+        finally:
+            try:
+                upstream_resp.close()
+            except Exception:
+                pass
+
+    resp_headers = {
+        "Content-Disposition": f'attachment; filename="{filename}"',
+        "Cache-Control": "no-store",
+        "X-Accel-Buffering": "no",
+    }
+    if content_length:
+        resp_headers["Content-Length"] = content_length
+
+    return Response(stream_with_context(generate()), status=200, mimetype=content_type, headers=resp_headers)
+
+
 @app.route("/api/download-stream", methods=["GET"])
 def download_stream():
-    """Stream or serve media directly on serverless cloud without background thread dependency."""
+    """High-speed media streaming endpoint: instant chunked streaming for single-stream formats, 16-thread merge for HD."""
     tunnel = should_proxy_to_tunnel()
     if tunnel:
         qs = request.query_string.decode("utf-8", errors="ignore")
@@ -3657,16 +3756,44 @@ def download_stream():
     format_id = request.args.get("format_id", "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best")
     title = request.args.get("title", "video")
     ext_hint = request.args.get("ext", "mp4").lower()
+    direct_url = (request.args.get("direct_url") or "").strip()
 
-    if not url:
+    if not url and not direct_url:
         return jsonify({"error": "Missing video URL parameter."}), 400
 
     safe_title = sanitize_filename(title) or "download"
-    job_dir = os.path.join(tempfile.gettempdir(), f"stream_{uuid.uuid4().hex[:12]}")
-    os.makedirs(job_dir, exist_ok=True)
-
     is_audio_only = "mp3" in format_id or ext_hint in ("mp3", "m4a", "wav")
     ext_out = "mp3" if is_audio_only else ("mp4" if ext_hint in ("mp4", "mkv", "mov") else ext_hint)
+
+    # FAST PATH 1: Direct static media URL (Pinterest, Amazon, Alibaba, Snapchat, TikTok, etc.) -> Instant <1s streaming!
+    if not direct_url and (format_id or "").startswith("direct::"):
+        direct_url = format_id.split("direct::", 1)[1]
+    if direct_url and direct_url.startswith(("http://", "https://")) and not any(x in direct_url for x in ["googlevideo.com", "hls_playlist", ".m3u8"]):
+        try:
+            return _stream_remote_media(direct_url, f"{safe_title}.{ext_out}", use_proxy=False)
+        except Exception:
+            pass
+
+    # FAST PATH 2: Single-stream format cached from /api/info (e.g. progressive MP4 '18' or M4A audio) -> Zero re-extraction, instant streaming!
+    needs_merge = ("+" in format_id) or ("bestvideo" in format_id) or ("mp3" in format_id)
+    if not needs_merge and url:
+        cached = _cache_get_info(url)
+        if cached and format_id in cached.get("fmt_urls", {}):
+            f_entry = cached["fmt_urls"][format_id]
+            try:
+                use_px = "googlevideo.com" in f_entry["url"]
+                return _stream_remote_media(
+                    f_entry["url"],
+                    f"{safe_title}.{f_entry.get('ext') or ext_out}",
+                    extra_headers=f_entry.get("headers"),
+                    use_proxy=use_px,
+                )
+            except Exception:
+                pass
+
+    # HIGH-SPEED MERGE PATH: 16-thread parallel DASH download + zero-reencode FFmpeg stream copy + 512KB chunked response
+    job_dir = os.path.join(tempfile.gettempdir(), f"stream_{uuid.uuid4().hex[:12]}")
+    os.makedirs(job_dir, exist_ok=True)
     outtmpl = os.path.join(job_dir, "media_out.%(ext)s")
 
     ydl_opts = get_base_ydl_opts()
@@ -3677,7 +3804,7 @@ def download_stream():
     })
     if FFMPEG_PATH and not is_audio_only:
         ydl_opts["merge_output_format"] = "mp4"
-        ydl_opts["postprocessor_args"] = {"Merger": ["-threads", "0", "-c", "copy"]}
+        ydl_opts["postprocessor_args"] = {"Merger": ["-threads", "0", "-c", "copy", "-movflags", "+faststart"]}
 
     try:
         last_exc = None
@@ -3703,7 +3830,6 @@ def download_stream():
         if last_exc:
             raise last_exc
     except Exception as e:
-        # Resilient fallback with embedded and android client
         try:
             fb_opts = get_base_ydl_opts()
             fb_opts.update({
@@ -3716,10 +3842,7 @@ def download_stream():
             with yt_dlp.YoutubeDL(fb_opts) as ydl:
                 ydl.download([url])
         except Exception as fb_err:
-            try:
-                shutil.rmtree(job_dir, ignore_errors=True)
-            except Exception:
-                pass
+            shutil.rmtree(job_dir, ignore_errors=True)
             return jsonify({"error": f"Download failed: {fb_err}"}), 500
 
     files = [
@@ -3728,27 +3851,35 @@ def download_stream():
         if not f.endswith(".part") and not f.endswith(".ytdl")
     ]
     if not files:
-        try:
-            shutil.rmtree(job_dir, ignore_errors=True)
-        except Exception:
-            pass
+        shutil.rmtree(job_dir, ignore_errors=True)
         return jsonify({"error": "Downloaded media file not found."}), 500
 
     final_file = max(files, key=os.path.getsize)
-
-    @after_this_request
-    def cleanup_stream_dir(response):
-        try:
-            shutil.rmtree(job_dir, ignore_errors=True)
-        except Exception:
-            pass
-        return response
-
+    file_size = os.path.getsize(final_file)
     actual_ext = os.path.splitext(final_file)[1].lstrip(".") or ext_out
-    return send_file(
-        final_file,
-        as_attachment=True,
-        download_name=f"{safe_title}.{actual_ext}",
+    mime = "audio/mpeg" if actual_ext == "mp3" else ("audio/mp4" if actual_ext == "m4a" else "video/mp4")
+
+    def stream_local_file():
+        try:
+            with open(final_file, "rb") as fh:
+                while True:
+                    chunk = fh.read(524288)  # 512KB high-throughput chunks
+                    if not chunk:
+                        break
+                    yield chunk
+        finally:
+            shutil.rmtree(job_dir, ignore_errors=True)
+
+    return Response(
+        stream_with_context(stream_local_file()),
+        status=200,
+        mimetype=mime,
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_title}.{actual_ext}"',
+            "Content-Length": str(file_size),
+            "Cache-Control": "no-store",
+            "X-Accel-Buffering": "no",
+        },
     )
 
 
