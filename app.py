@@ -3796,14 +3796,13 @@ def download_stream():
                     }
             except Exception:
                 pass
-        if f_entry and f_entry.get("url"):
+        if f_entry and f_entry.get("url") and "googlevideo.com" not in f_entry["url"]:
             try:
-                use_px = "googlevideo.com" in f_entry["url"]
                 return _stream_remote_media(
                     f_entry["url"],
                     f"{safe_title}.{f_entry.get('ext') or ext_out}",
                     extra_headers=f_entry.get("headers"),
-                    use_proxy=use_px,
+                    use_proxy=False,
                 )
             except Exception:
                 pass
