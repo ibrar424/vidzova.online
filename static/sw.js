@@ -1,10 +1,7 @@
-/* Vidzova Service Worker v1.0 */
-const CACHE_NAME = 'vidzova-v3';
+/* Vidzova Service Worker v4.0 */
+const CACHE_NAME = 'vidzova-v4';
 const STATIC_ASSETS = [
-  '/',
   '/site.webmanifest',
-  '/styles.css',
-  '/script.js',
   '/favicon.ico',
   '/favicon.svg',
   '/android-chrome-192x192.png',
@@ -41,12 +38,26 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Skip non-GET requests and API / download endpoints
-  if (req.method !== 'GET' || url.pathname.startsWith('/api/') || url.pathname.startsWith('/download')) {
+  // Skip non-GET requests, cross-origin requests, and API / download endpoints
+  if (
+    req.method !== 'GET' ||
+    url.origin !== self.location.origin ||
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/download')
+  ) {
     return;
   }
 
-  // Stale-while-revalidate for static assets, network-first for pages
+  // Network-First for HTML / navigation requests so users always see latest HTML immediately
+  const accept = req.headers.get('accept') || '';
+  if (req.mode === 'navigate' || accept.includes('text/html')) {
+    event.respondWith(
+      fetch(req).catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // Stale-while-revalidate for static assets (CSS, JS, icons)
   event.respondWith(
     caches.match(req).then((cached) => {
       const fetchPromise = fetch(req).then((networkRes) => {

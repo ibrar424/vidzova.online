@@ -1297,25 +1297,46 @@ def render_seo_page(req_path):
     content = re.sub(r'<p id="heroSubtitle" class="sf-hero-sub">.*?</p>', f'<p id="heroSubtitle" class="sf-hero-sub">{cfg["subtitle"]}</p>', content, count=1)
 
     # 5. Keyword in H2 & Platform-Specific 3-Step Instructions (Tip 3)
-    content = re.sub(r'<h2 id="howToHeading" class="sf-section-title">.*?</h2>', f'<h2 id="howToHeading" class="sf-section-title">How to Download {cfg["platform"]} Videos in 3 Easy Steps</h2>', content, count=1)
-    content = re.sub(
-        r'<h3 id="step1Title">.*?</h3>\s*<p id="step1Desc">.*?</p>',
-        f'<h3 id="step1Title">Copy the {cfg["platform"]} Link</h3>\n            <p id="step1Desc">Open {cfg["platform"]} in your browser or mobile app and copy the URL of the public {cfg["platform"]} video or clip you want to save.</p>',
-        content,
-        count=1,
-    )
-    content = re.sub(
-        r'<h3 id="step2Title">.*?</h3>\s*<p id="step2Desc">.*?</p>',
-        f'<h3 id="step2Title">Paste into {cfg["keyword"]}</h3>\n            <p id="step2Desc">Paste the copied {cfg["platform"]} URL into the input box at the top of this {cfg["keyword"].lower()} page and click <strong>Download</strong>.</p>',
-        content,
-        count=1,
-    )
-    content = re.sub(
-        r'<h3 id="step3Title">.*?</h3>\s*<p id="step3Desc">.*?</p>',
-        f'<h3 id="step3Title">Choose {cfg["platform"]} Quality &amp; Save</h3>\n            <p id="step3Desc">Select your preferred {cfg["platform"]} output stream (Full HD 1080p MP4, 720p, 4K, or MP3 audio) to download directly to your device.</p>',
-        content,
-        count=1,
-    )
+    if key == "home":
+        content = re.sub(r'<h2 id="howToHeading" class="sf-section-title">.*?</h2>', '<h2 id="howToHeading" class="sf-section-title">How to Download Videos Online in 3 Easy Steps</h2>', content, count=1)
+        content = re.sub(
+            r'<h3 id="step1Title">.*?</h3>\s*<p id="step1Desc">.*?</p>',
+            '<h3 id="step1Title">Copy the Video Link</h3>\n            <p id="step1Desc">Open YouTube, TikTok, Instagram, Facebook, or any supported site and copy the URL of the public video you want to save.</p>',
+            content,
+            count=1,
+        )
+        content = re.sub(
+            r'<h3 id="step2Title">.*?</h3>\s*<p id="step2Desc">.*?</p>',
+            '<h3 id="step2Title">Paste Link into Vidzova</h3>\n            <p id="step2Desc">Paste the copied video URL into the input box at the top of this page and press the <strong>Download</strong> button.</p>',
+            content,
+            count=1,
+        )
+        content = re.sub(
+            r'<h3 id="step3Title">.*?</h3>\s*<p id="step3Desc">.*?</p>',
+            '<h3 id="step3Title">Select Format &amp; Save</h3>\n            <p id="step3Desc">Choose your preferred resolution (MP4 720p, 1080p, 4K, or MP3 audio) and save directly to your device.</p>',
+            content,
+            count=1,
+        )
+    else:
+        content = re.sub(r'<h2 id="howToHeading" class="sf-section-title">.*?</h2>', f'<h2 id="howToHeading" class="sf-section-title">How to Download {cfg["platform"]} Videos in 3 Easy Steps</h2>', content, count=1)
+        content = re.sub(
+            r'<h3 id="step1Title">.*?</h3>\s*<p id="step1Desc">.*?</p>',
+            f'<h3 id="step1Title">Copy the {cfg["platform"]} Link</h3>\n            <p id="step1Desc">Open {cfg["platform"]} in your browser or mobile app and copy the URL of the public {cfg["platform"]} video or clip you want to save.</p>',
+            content,
+            count=1,
+        )
+        content = re.sub(
+            r'<h3 id="step2Title">.*?</h3>\s*<p id="step2Desc">.*?</p>',
+            f'<h3 id="step2Title">Paste into {cfg["keyword"]}</h3>\n            <p id="step2Desc">Paste the copied {cfg["platform"]} URL into the input box at the top of this {cfg["keyword"].lower()} page and click <strong>Download</strong>.</p>',
+            content,
+            count=1,
+        )
+        content = re.sub(
+            r'<h3 id="step3Title">.*?</h3>\s*<p id="step3Desc">.*?</p>',
+            f'<h3 id="step3Title">Choose {cfg["platform"]} Quality &amp; Save</h3>\n            <p id="step3Desc">Select your preferred {cfg["platform"]} output stream (Full HD 1080p MP4, 720p, 4K, or MP3 audio) to download directly to your device.</p>',
+            content,
+            count=1,
+        )
 
     # 6. Keyword in Image Alt Text (Tip 4)
     content = content.replace('alt="Online Video Downloader Media Thumbnail"', f'alt="{cfg["keyword"]} Media Thumbnail"')
@@ -2288,7 +2309,10 @@ def api_generate_post_image():
 def api_proxy_image():
     """Proxy image for safe local download to avoid browser CORS/cross-origin issues."""
     target_url = request.args.get("url")
-    filename = request.args.get("filename", "social_post_image.png")
+    raw_fn = request.args.get("filename", "social_post_image.png")
+    fn_root, fn_ext = os.path.splitext(raw_fn)
+    safe_fn_ext = re.sub(r"[^a-zA-Z0-9]", "", fn_ext.lstrip(".")) or "png"
+    filename = f"{sanitize_filename(fn_root) or 'social_post_image'}.{safe_fn_ext}"
     if not target_url or not target_url.startswith(("http://", "https://")):
         return jsonify({"error": "Invalid URL"}), 400
 
@@ -3818,7 +3842,17 @@ def download_stream():
         "format": target_format,
         "outtmpl": outtmpl,
     })
-    if FFMPEG_PATH and not is_audio_only:
+    if FFMPEG_PATH and is_audio_only and (ext_hint == "mp3" or "mp3" in format_id):
+        mp3_kbps = "192"
+        m_kbps = re.search(r"(320|256|192|128)", format_id)
+        if m_kbps:
+            mp3_kbps = m_kbps.group(1)
+        ydl_opts["postprocessors"] = [{
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "mp3",
+            "preferredquality": mp3_kbps,
+        }]
+    elif FFMPEG_PATH and not is_audio_only:
         ydl_opts["merge_output_format"] = "mp4"
         ydl_opts["postprocessor_args"] = {"Merger": ["-threads", "0", "-c", "copy", "-movflags", "+faststart"]}
 
