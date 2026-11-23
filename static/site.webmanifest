@@ -9,7 +9,11 @@
   "orientation": "portrait-primary",
   "background_color": "#0f172a",
   "theme_color": "#00b956",
-  "categories": ["utilities", "multimedia", "video"],
+  "categories": [
+    "utilities",
+    "multimedia",
+    "video"
+  ],
   "icons": [
     {
       "src": "/favicon-48x48.png",
@@ -60,21 +64,45 @@
       "short_name": "YouTube",
       "description": "Download YouTube videos and MP3 audio",
       "url": "/youtube-video-downloader",
-      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "TikTok Downloader",
       "short_name": "TikTok",
       "description": "Download TikTok videos without watermark",
       "url": "/tiktok-video-downloader",
-      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Instagram Downloader",
       "short_name": "Instagram",
       "description": "Download Instagram Reels and videos",
       "url": "/instagram-video-downloader",
-      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
-  ]
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }

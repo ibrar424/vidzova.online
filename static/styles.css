@@ -6903,3 +6903,277 @@ body.reddit-mode .sf-nav-reddit.active {
   color: #00b956;
   text-decoration: underline;
 }
+
+
+/* ==========================================================================
+   MOBILE-FIRST UX SUITE (Phones & Tablets - iOS Safari & Android Chrome)
+   ========================================================================== */
+html, body {
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a, input, select {
+  touch-action: manipulation;
+}
+
+.sf-mobile-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--sf-border);
+  background: var(--sf-surface);
+  color: var(--sf-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sf-mobile-share-btn:hover,
+.sf-mobile-share-btn:active {
+  border-color: var(--sf-green);
+  color: var(--sf-green);
+}
+
+/* Mobile Sticky Bottom Bar (hidden on desktop) */
+.sf-mobile-bottom-bar {
+  display: none;
+}
+
+/* Mobile Platform Picker Bottom Sheet */
+.sf-mobile-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sf-mobile-sheet-overlay.hidden {
+  display: none !important;
+}
+
+.sf-mobile-sheet {
+  width: 100%;
+  max-width: 540px;
+  max-height: 82vh;
+  overflow-y: auto;
+  background: var(--sf-surface, #ffffff);
+  color: var(--sf-text, #0f172a);
+  border-radius: 22px 22px 0 0;
+  padding: 10px 16px calc(22px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.22);
+  animation: sfSheetUp 0.22s ease-out;
+}
+
+@keyframes sfSheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.sf-sheet-handle {
+  width: 42px;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--sf-border, #cbd5e1);
+  margin: 2px auto 12px;
+}
+
+.sf-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sf-sheet-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.sf-sheet-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--sf-border);
+  background: transparent;
+  color: var(--sf-text);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sf-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.sf-sheet-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--sf-border);
+  background: var(--sf-bg, #f8fafc);
+  color: var(--sf-text);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: transform 0.12s ease, border-color 0.15s ease;
+}
+
+.sf-sheet-card:active {
+  transform: scale(0.97);
+  border-color: var(--sf-green);
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Show Sticky Mobile Bottom Bar */
+  .sf-mobile-bottom-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9500;
+    background: var(--sf-surface, #ffffff);
+    border-top: 1px solid var(--sf-border, #e2e8f0);
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08);
+  }
+
+  .sf-mb-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 48px;
+    border: none;
+    background: transparent;
+    color: var(--sf-muted, #64748b);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 10px;
+    padding: 4px 2px;
+    transition: color 0.15s ease, transform 0.1s ease;
+  }
+
+  .sf-mb-item:active {
+    transform: scale(0.94);
+    color: var(--sf-green);
+  }
+
+  .sf-mb-paste {
+    color: var(--sf-green, #00b956);
+  }
+
+  /* Compact Header & Touch Targets on Phones */
+  .sf-google-login-btn span {
+    display: none;
+  }
+
+  .sf-google-login-btn {
+    padding: 0 10px !important;
+    min-width: 38px;
+    justify-content: center;
+  }
+
+  .sf-lang-btn {
+    padding: 0 8px !important;
+    height: 36px;
+    font-size: 0.78rem;
+  }
+
+  /* Result Card & Action Buttons Mobile Layout */
+  .sf-result-card {
+    padding: 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .sf-action-area {
+    flex-direction: column !important;
+    width: 100%;
+    gap: 10px !important;
+  }
+
+  .sf-dl-main-btn,
+  .sf-format-dropdown,
+  .sf-format-trigger {
+    width: 100% !important;
+    min-height: 48px !important;
+    justify-content: center;
+  }
+
+  .sf-video-title {
+    font-size: 1.05rem !important;
+    line-height: 1.35;
+  }
+
+  .sf-video-meta {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* Bottom-sheet style Format Picker Menu on Mobile */
+  .sf-format-menu {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 70vh !important;
+    overflow-y: auto !important;
+    border-radius: 20px 20px 0 0 !important;
+    padding: 14px 14px calc(22px + env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 9998 !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.28) !important;
+  }
+
+  .sf-format-option {
+    min-height: 48px !important;
+    padding: 10px 14px !important;
+    font-size: 0.95rem !important;
+  }
+
+  /* Grids stack cleanly on mobile */
+  .sf-steps-grid,
+  .sf-related-grid,
+  .sf-directory-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .sf-footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .sf-footer-links,
+  .sf-footer-legal-links {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+}

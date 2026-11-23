@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <!-- Google AdSense Verification & Auto Ads -->
   <meta name="google-adsense-account" content="ca-pub-6642203876582146">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6642203876582146"
@@ -119,7 +122,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="/styles.css?v=44" />
+  <link rel="stylesheet" href="/styles.css?v=45" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -308,7 +311,12 @@
         <form id="searchForm" class="sf-search-box" autocomplete="off">
           <div class="sf-input-wrapper">
             <input
-              type="text"
+              type="url"
+              inputmode="url"
+              enterkeyhint="go"
+              autocapitalize="off"
+              autocorrect="off"
+              spellcheck="false"
               id="videoUrlInput"
               class="sf-input"
               placeholder="Paste your YouTube video link here..."
@@ -398,6 +406,10 @@
                 <span class="sf-meta-dot">•</span>
                 <span id="videoViews" class="sf-meta-item">Ready to save</span>
                 <a id="originalLink" href="#" target="_blank" rel="noopener noreferrer" class="sf-source-link">Open source ↗</a>
+                <button type="button" id="mobileShareBtn" class="sf-mobile-share-btn" title="Share video link" aria-label="Share video link">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                  <span>Share</span>
+                </button>
               </div>
 
               <!-- SaveFrom Action Controls: Split Download Button + Format Selector -->
@@ -1430,7 +1442,59 @@
     </div>
   </div>
 
-  <script src="/script.js?v=44" defer></script>
+
+  <!-- Mobile Sticky Bottom App Bar (Phones & Tablets <= 768px) -->
+  <nav class="sf-mobile-bottom-bar" id="mobileBottomBar" aria-label="Mobile Quick Navigation">
+    <a href="/" class="sf-mb-item" id="mbHomeBtn" aria-label="Home">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span>Home</span>
+    </a>
+    <button type="button" class="sf-mb-item sf-mb-paste" id="mbPasteBtn" aria-label="Paste Link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+      <span>Paste</span>
+    </button>
+    <button type="button" class="sf-mb-item" id="mbPlatformsBtn" aria-label="All Platforms">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect></svg>
+      <span>Platforms</span>
+    </button>
+    <button type="button" class="sf-mb-item" id="mbHistoryBtn" aria-label="History">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      <span>History</span>
+    </button>
+    <button type="button" class="sf-mb-item" id="mbThemeBtn" aria-label="Toggle Theme">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+      <span>Theme</span>
+    </button>
+  </nav>
+
+  <!-- Mobile Platform Picker Bottom Sheet -->
+  <div id="mobilePlatformSheet" class="sf-mobile-sheet-overlay hidden" role="dialog" aria-modal="true" aria-label="Choose Platform">
+    <div class="sf-mobile-sheet">
+      <div class="sf-sheet-handle"></div>
+      <div class="sf-sheet-header">
+        <h3>Choose Platform or Tool</h3>
+        <button type="button" id="closePlatformSheetBtn" class="sf-sheet-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="sf-sheet-grid">
+        <a href="/youtube-video-downloader" class="sf-sheet-card"><span>▶</span> YouTube</a>
+        <a href="/youtube-to-mp3" class="sf-sheet-card"><span>🎵</span> YouTube MP3</a>
+        <a href="/tiktok-video-downloader" class="sf-sheet-card"><span>📱</span> TikTok</a>
+        <a href="/instagram-video-downloader" class="sf-sheet-card"><span>📸</span> Instagram</a>
+        <a href="/facebook-video-downloader" class="sf-sheet-card"><span>📘</span> Facebook</a>
+        <a href="/twitter-video-downloader" class="sf-sheet-card"><span>𝕏</span> Twitter / X</a>
+        <a href="/snapchat-video-downloader" class="sf-sheet-card"><span>👻</span> Snapchat</a>
+        <a href="/pinterest-video-downloader" class="sf-sheet-card"><span>📌</span> Pinterest</a>
+        <a href="/reddit-video-downloader" class="sf-sheet-card"><span>🔴</span> Reddit</a>
+        <a href="/amazon-video-downloader" class="sf-sheet-card"><span>🛒</span> Amazon</a>
+        <a href="/alibaba-video-downloader" class="sf-sheet-card"><span>📦</span> Alibaba</a>
+        <a href="/video-scene-extractor" class="sf-sheet-card"><span>🎬</span> Scene Extractor</a>
+        <a href="/one-video-five-social-posts" class="sf-sheet-card"><span>✨</span> 5 Social Posts</a>
+        <a href="/faq" class="sf-sheet-card"><span>❓</span> Help &amp; FAQ</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/script.js?v=45" defer></script>
   <script src="/i18n.js?v=42" defer></script>
   <script src="/pwa-install.js?v=1" defer></script>
 </body>

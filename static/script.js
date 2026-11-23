@@ -1561,4 +1561,91 @@ document.addEventListener("DOMContentLoaded", () => {
 
   
   renderGoogleUser();
+
+  // =========================================================
+  // MOBILE-FIRST FEATURES: Share Target, Bottom Bar, Platform Sheet & Native Share
+  // =========================================================
+  const mbPasteBtn = document.getElementById("mbPasteBtn");
+  const mbPlatformsBtn = document.getElementById("mbPlatformsBtn");
+  const mbHistoryBtn = document.getElementById("mbHistoryBtn");
+  const mbThemeBtn = document.getElementById("mbThemeBtn");
+  const mobilePlatformSheet = document.getElementById("mobilePlatformSheet");
+  const closePlatformSheetBtn = document.getElementById("closePlatformSheetBtn");
+  const mobileShareBtn = document.getElementById("mobileShareBtn");
+
+  if (mbPasteBtn && pasteBtn) {
+    mbPasteBtn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      pasteBtn.click();
+    });
+  }
+
+  if (mbPlatformsBtn && mobilePlatformSheet) {
+    mbPlatformsBtn.addEventListener("click", () => {
+      mobilePlatformSheet.classList.remove("hidden");
+    });
+  }
+
+  if (closePlatformSheetBtn && mobilePlatformSheet) {
+    closePlatformSheetBtn.addEventListener("click", () => {
+      mobilePlatformSheet.classList.add("hidden");
+    });
+    mobilePlatformSheet.addEventListener("click", (e) => {
+      if (e.target === mobilePlatformSheet) {
+        mobilePlatformSheet.classList.add("hidden");
+      }
+    });
+  }
+
+  if (mbHistoryBtn) {
+    mbHistoryBtn.addEventListener("click", () => {
+      const histEl = document.getElementById("historySection") || document.getElementById("historyList");
+      if (histEl && !histEl.classList.contains("hidden")) {
+        histEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        if (videoUrlInput) videoUrlInput.focus();
+      }
+    });
+  }
+
+  if (mbThemeBtn && themeToggle) {
+    mbThemeBtn.addEventListener("click", () => themeToggle.click());
+  }
+
+  if (mobileShareBtn) {
+    mobileShareBtn.addEventListener("click", async () => {
+      const shareUrl = (currentVideo && currentVideo.webpage_url) || window.location.href;
+      const shareTitle = (currentVideo && currentVideo.title) || document.title;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: shareTitle, text: `Download "${shareTitle}" on Vidzova`, url: shareUrl });
+          return;
+        } catch (err) {}
+      }
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        const span = mobileShareBtn.querySelector("span");
+        if (span) {
+          span.textContent = "Copied!";
+          setTimeout(() => { span.textContent = "Share"; }, 1800);
+        }
+      } catch (err) {}
+    });
+  }
+
+  // Auto-handle Android/PWA Share Target (?url=... or ?text=...) and deep links
+  try {
+    const sp = new URLSearchParams(window.location.search);
+    const sharedRaw = sp.get("url") || sp.get("text") || "";
+    const urlMatch = sharedRaw.match(/https?:\/\/[^\s]+/i);
+    const sharedUrl = urlMatch ? urlMatch[0] : (sharedRaw.startsWith("http") ? sharedRaw : "");
+    if (sharedUrl && videoUrlInput) {
+      videoUrlInput.value = sharedUrl;
+      if (clearInputBtn) clearInputBtn.classList.remove("hidden");
+      autoDetectPlatformFromUrl(sharedUrl);
+      fetchVideoInfo(sharedUrl);
+    }
+  } catch (e) {}
+
 });
