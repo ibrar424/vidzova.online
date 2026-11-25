@@ -110,8 +110,33 @@ def _cache_set_info(url_key, payload, fmt_url_map=None):
         }
 
 
-def get_base_ydl_opts():
-    """Return maximum-speed yt-dlp options with 16 parallel fragment threads and 1MB socket buffer."""
+_ACTIVE_PROXY_IDX = [0]
+_PROXY_DEAD_UNTIL = [0.0]
+
+
+def get_proxy_list():
+    """Return list of configured proxies from YTDLP_PROXY if healthy (auto-bypasses expired 402 proxies)."""
+    if time.time() < _PROXY_DEAD_UNTIL[0]:
+        return []
+    raw = (os.environ.get("YTDLP_PROXY") or os.environ.get("PROXY_URL") or "").strip()
+    if not raw:
+        return []
+    return [x.strip() for x in raw.split(",") if x.strip()]
+
+
+def advance_proxy(err_str: str = ""):
+    """Advance to next proxy in pool, or suspend proxy pool for 30 min on 402 Payment Required."""
+    if err_str and ("402" in err_str or "Payment Required" in err_str):
+        _PROXY_DEAD_UNTIL[0] = time.time() + 1800
+    _ACTIVE_PROXY_IDX[0] += 1
+
+
+def is_youtube_url(url: str) -> bool:
+    return bool(re.search(r"(^|//|\.)(youtube\.com|youtu\.be|youtube-nocookie\.com)/", url or "", re.IGNORECASE))
+
+
+def get_base_ydl_opts(target_url: str = "", allow_proxy: bool = True):
+    """Return maximum-speed yt-dlp options. Only attaches YTDLP_PROXY for YouTube (and only when proxy is alive)."""
     opts = {
         "quiet": True,
         "no_warnings": True,
@@ -121,11 +146,11 @@ def get_base_ydl_opts():
         "cachedir": False,
         "socket_timeout": 15,
         "js_runtimes": {"node": {}},
-        "http_chunk_size": 10485760,  # 10MB chunking bypasses YouTube 50KB/s throttle
-        "concurrent_fragment_downloads": 16,  # 16 parallel threads for DASH/HLS segments
-        "buffersize": 1024 * 1024,  # 1MB socket buffer for maximum throughput
-        "retries": 5,
-        "fragment_retries": 5,
+        "http_chunk_size": 10485760,
+        "concurrent_fragment_downloads": 16,
+        "buffersize": 1024 * 1024,
+        "retries": 4,
+        "fragment_retries": 4,
     }
     cookies_env = os.environ.get("YOUTUBE_COOKIES") or os.environ.get("COOKIES_DATA")
     if cookies_env:
@@ -138,28 +163,13 @@ def get_base_ydl_opts():
             pass
     elif os.path.exists("cookies.txt"):
         opts["cookiefile"] = "cookies.txt"
-    proxy_list = get_proxy_list()
-    if proxy_list:
-        opts["proxy"] = proxy_list[_ACTIVE_PROXY_IDX[0] % len(proxy_list)]
+    if allow_proxy and (not target_url or is_youtube_url(target_url)):
+        proxy_list = get_proxy_list()
+        if proxy_list:
+            opts["proxy"] = proxy_list[_ACTIVE_PROXY_IDX[0] % len(proxy_list)]
     if FFMPEG_PATH:
         opts["ffmpeg_location"] = FFMPEG_PATH
     return opts
-
-
-_ACTIVE_PROXY_IDX = [0]
-
-
-def get_proxy_list():
-    """Return list of configured proxies from YTDLP_PROXY (supports comma-separated failover pool)."""
-    raw = (os.environ.get("YTDLP_PROXY") or os.environ.get("PROXY_URL") or "").strip()
-    if not raw:
-        return []
-    return [x.strip() for x in raw.split(",") if x.strip()]
-
-
-def advance_proxy():
-    """Advance to next proxy in pool on failure."""
-    _ACTIVE_PROXY_IDX[0] += 1
 
 
 def is_pinterest_url(url: str) -> bool:
@@ -183,6 +193,22 @@ def is_snapchat_url(url: str) -> bool:
 
 def is_tiktok_url(url: str) -> bool:
     return bool(re.search(r"(^|//|\.)(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)/", url, re.IGNORECASE))
+
+
+def is_twitter_url(url: str) -> bool:
+    return bool(re.search(r"(^|//|\.)(twitter\.com|x\.com|t\.co)/", url, re.IGNORECASE))
+
+
+def is_instagram_url(url: str) -> bool:
+    return bool(re.search(r"(^|//|\.)(instagram\.com|instagr\.am)/", url, re.IGNORECASE))
+
+
+def is_reddit_url(url: str) -> bool:
+    return bool(re.search(r"(^|//|\.)(reddit\.com|redd\.it)/", url, re.IGNORECASE))
+
+
+def is_facebook_url(url: str) -> bool:
+    return bool(re.search(r"(^|//|\.)(facebook\.com|fb\.watch|fb\.com)/", url, re.IGNORECASE))
 
 
 def resolve_pinterest_url(url: str) -> str:
@@ -520,6 +546,10 @@ def extract_amazon_product(url: str):
         })
         if len(image_formats) >= 5:
             break
+
+    # Ensure combined_formats is never empty even when Amazon only exposes gallery images on datacenter IPs
+    if not combined_formats and image_formats:
+        combined_formats.extend(image_formats[:3])
 
     # Guaranteed fallback if Amazon rate-limited this IP for an arbitrary ASIN
     if not combined_formats and not image_formats:
@@ -1175,6 +1205,405 @@ def extract_tiktok_media(url: str):
             pass
 
     raise ValueError("Unable to extract this TikTok link. Please check that the TikTok video is public.")
+
+
+def extract_twitter_media(url: str):
+    """
+    Permanent Multi-Engine Twitter / X Video & GIF Extractor.
+    Engine 1: FxTwitter JSON API (all MP4 bitrates 1080p/720p/480p + GIFs + photos)
+    Engine 2: Official Twitter Syndication API (cdn.syndication.twimg.com/tweet-result)
+    """
+    import math
+    resolved = url
+    if "t.co/" in url.lower():
+        try:
+            r_req = urllib.request.Request(url, headers={"User-Agent": BROWSER_UA})
+            with urllib.request.urlopen(r_req, timeout=8) as r_resp:
+                resolved = r_resp.geturl() or url
+        except Exception:
+            pass
+
+    m = re.search(r"/status(?:es)?/(\d+)", resolved)
+    if not m:
+        raise ValueError("Please paste a direct X / Twitter post link containing /status/...")
+    tid = m.group(1)
+
+    # Engine 1: FxTwitter API
+    try:
+        fx_req = urllib.request.Request(
+            f"https://api.fxtwitter.com/i/status/{tid}",
+            headers={"User-Agent": "Vidzova/2.0 (+https://vidzova.online)", "Accept": "application/json"},
+        )
+        with urllib.request.urlopen(fx_req, timeout=10) as resp:
+            fx = json.loads(resp.read().decode("utf-8", errors="ignore"))
+        tw = fx.get("tweet") or {}
+        media_root = tw.get("media") or {}
+        videos = media_root.get("videos") or []
+        photos = media_root.get("photos") or []
+        all_media = media_root.get("all") or []
+        author_obj = tw.get("author") or {}
+        uploader = author_obj.get("name") or author_obj.get("screen_name") or "X Creator"
+        screen_name = author_obj.get("screen_name") or "i"
+        title = (tw.get("text") or "").strip().splitlines()[0][:100] if tw.get("text") else f"X Video by @{screen_name}"
+        if not title:
+            title = f"X Post {tid}"
+
+        combined = []
+        thumb = ""
+        duration = 0
+        for v in videos:
+            if not thumb:
+                thumb = v.get("thumbnail_url") or ""
+            duration = int(float(v.get("duration") or 0))
+            variants = v.get("variants") or []
+            mp4_vars = [vr for vr in variants if "mp4" in (vr.get("content_type") or "") and vr.get("url")]
+            if not mp4_vars and v.get("url"):
+                mp4_vars = [{"url": v["url"], "bitrate": 2000000}]
+            mp4_vars.sort(key=lambda x: x.get("bitrate") or 0, reverse=True)
+            seen_u = set()
+            for vr in mp4_vars:
+                vu = vr["url"]
+                if vu in seen_u:
+                    continue
+                seen_u.add(vu)
+                hm = re.search(r"/(\d+)x(\d+)/", vu)
+                h_px = min(int(hm.group(1)), int(hm.group(2))) if hm else (1080 if (vr.get("bitrate") or 0) > 2000000 else 720)
+                badge = "FHD" if h_px >= 1080 else ("HD" if h_px >= 720 else "SD")
+                is_gif = (v.get("type") == "gif")
+                combined.append({
+                    "format_id": f"direct::{vu}",
+                    "ext": "MP4",
+                    "quality": "Animated GIF (MP4)" if is_gif else f"{h_px}p",
+                    "height": h_px,
+                    "fps": 30,
+                    "category": "combined",
+                    "has_audio": not is_gif,
+                    "has_video": True,
+                    "is_gif": is_gif,
+                    "filesize": None,
+                    "filesize_str": "Direct MP4",
+                    "direct_url": vu,
+                    "label": "MP4 Animated GIF" if is_gif else f"MP4 {h_px}p",
+                    "badge": "GIF" if is_gif else badge,
+                })
+
+        for idx_p, ph in enumerate(photos[:6], 1):
+            pu = ph.get("url")
+            if pu:
+                if not thumb:
+                    thumb = pu
+                combined.append({
+                    "format_id": f"direct::{pu}",
+                    "ext": "JPG",
+                    "quality": f"HD Image #{idx_p}",
+                    "height": ph.get("height") or 1080,
+                    "fps": 0,
+                    "category": "combined",
+                    "has_audio": False,
+                    "has_video": False,
+                    "is_image": True,
+                    "filesize": None,
+                    "filesize_str": "HD Photo",
+                    "direct_url": pu,
+                    "label": f"JPG Tweet Image #{idx_p}",
+                    "badge": "IMG",
+                })
+
+        if combined:
+            payload = {
+                "id": tid,
+                "title": title,
+                "uploader": f"{uploader} (@{screen_name})",
+                "thumbnail": thumb,
+                "duration": duration,
+                "duration_str": format_duration(duration) if duration else "X Media",
+                "view_count": tw.get("views"),
+                "webpage_url": f"https://x.com/{screen_name}/status/{tid}",
+                "extractor": "Twitter",
+                "has_ffmpeg": FFMPEG_PATH is not None,
+                "formats": {"combined": combined, "video_only": [], "audio": []},
+            }
+            _cache_set_info(url, payload, {})
+            return payload
+    except Exception:
+        pass
+
+    # Engine 2: Official Twitter Syndication API
+    try:
+        val = (int(tid) / 1e15) * math.pi
+        chars = "0123456789abcdefghijklmnopqrstuvwxyz"
+        int_p = int(val)
+        frac = val - int_p
+        tok = chars[int_p] if int_p < 36 else ""
+        for _ in range(12):
+            frac *= 36
+            d_i = int(frac)
+            tok += chars[d_i]
+            frac -= d_i
+        tok = tok.replace("0", "")
+        syn_url = f"https://cdn.syndication.twimg.com/tweet-result?id={tid}&lang=en&token={tok}"
+        s_req = urllib.request.Request(syn_url, headers={"User-Agent": BROWSER_UA})
+        with urllib.request.urlopen(s_req, timeout=10) as s_resp:
+            sd = json.loads(s_resp.read().decode("utf-8", errors="ignore"))
+        combined = []
+        thumb = ""
+        for md in (sd.get("mediaDetails") or []):
+            if not thumb:
+                thumb = md.get("media_url_https") or ""
+            vinfo = md.get("video_info") or {}
+            vars_list = [v for v in (vinfo.get("variants") or []) if "mp4" in (v.get("content_type") or "") and v.get("url")]
+            vars_list.sort(key=lambda x: x.get("bitrate") or 0, reverse=True)
+            for vr in vars_list:
+                vu = vr["url"]
+                hm = re.search(r"/(\d+)x(\d+)/", vu)
+                h_px = min(int(hm.group(1)), int(hm.group(2))) if hm else 720
+                combined.append({
+                    "format_id": f"direct::{vu}",
+                    "ext": "MP4",
+                    "quality": f"{h_px}p",
+                    "height": h_px,
+                    "fps": 30,
+                    "category": "combined",
+                    "has_audio": True,
+                    "has_video": True,
+                    "filesize_str": "Direct MP4",
+                    "direct_url": vu,
+                    "label": f"MP4 {h_px}p",
+                    "badge": "HD" if h_px >= 720 else "SD",
+                })
+        if combined:
+            usr = sd.get("user") or {}
+            payload = {
+                "id": tid,
+                "title": (sd.get("text") or f"X Video {tid}").splitlines()[0][:100],
+                "uploader": usr.get("name") or "X Creator",
+                "thumbnail": thumb,
+                "duration": 0,
+                "duration_str": "HD",
+                "view_count": None,
+                "webpage_url": resolved,
+                "extractor": "Twitter",
+                "has_ffmpeg": FFMPEG_PATH is not None,
+                "formats": {"combined": combined, "video_only": [], "audio": []},
+            }
+            _cache_set_info(url, payload, {})
+            return payload
+    except Exception:
+        pass
+
+    raise ValueError("Could not find downloadable media on this X/Twitter post.")
+
+
+def extract_instagram_media(url: str):
+    """
+    Permanent Login-Free Instagram Reel, Video & Post Extractor via Mobile Embed Parser.
+    Extracts direct fbcdn MP4 video_url, high-res display_url, author, and caption in <1s without cookies.
+    """
+    sc_m = re.search(r"/(?:reel|reels|p|tv)/([A-Za-z0-9_-]+)", url)
+    if not sc_m:
+        raise ValueError("Please paste a valid Instagram Reel or post URL (e.g., instagram.com/reel/...).")
+    shortcode = sc_m.group(1)
+
+    for path_prefix in ("p", "reel"):
+        try:
+            emb_url = f"https://www.instagram.com/{path_prefix}/{shortcode}/embed/captioned/"
+            req = urllib.request.Request(
+                emb_url,
+                headers={
+                    "User-Agent": MOBILE_SAFARI_UA,
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    "Accept-Language": "en-US,en;q=0.9",
+                },
+            )
+            with urllib.request.urlopen(req, timeout=12) as resp:
+                raw_html = resp.read().decode("utf-8", errors="ignore")
+
+            # Unescape nested contextJSON strings
+            unesc = (
+                raw_html.replace("\\\\\\/", "/")
+                .replace("\\/", "/")
+                .replace(r"\/", "/")
+                .replace('\\"', '"')
+                .replace('\"', '"')
+                .replace("\\u0026", "&")
+                .replace("\u0026", "&")
+                .replace("&amp;", "&")
+            )
+
+            video_urls = list(dict.fromkeys(re.findall(r'"video_url"\s*:\s*"(https://[^"]+)"', unesc)))
+            display_urls = list(dict.fromkeys(re.findall(r'"display_url"\s*:\s*"(https://[^"]+)"', unesc)))
+            if not video_urls:
+                og_v = re.findall(r'class="EmbeddedMediaVideo"[^>]*src="([^"]+)"', raw_html)
+                video_urls = [html.unescape(x) for x in og_v if x]
+
+            user_m = re.search(r'"username"\s*:\s*"([^"]+)"', unesc)
+            username = user_m.group(1) if user_m else "Instagram Creator"
+            cap_m = re.search(r'class="Caption"[^>]*>[\s\S]*?<a[^>]*>[^<]*</a>\s*([^<]+)', raw_html)
+            caption = html.unescape(cap_m.group(1)).strip()[:100] if cap_m else f"Instagram Reel by @{username}"
+            if not caption:
+                caption = f"Instagram Reel ({shortcode})"
+
+            combined = []
+            for idx_v, vu in enumerate(video_urls[:10], 1):
+                suffix = "" if len(video_urls) == 1 else f" #{idx_v}"
+                combined.append({
+                    "format_id": f"direct::{vu}",
+                    "ext": "MP4",
+                    "quality": f"1080p HD{suffix}",
+                    "height": 1080,
+                    "fps": 30,
+                    "category": "combined",
+                    "has_audio": True,
+                    "has_video": True,
+                    "filesize": None,
+                    "filesize_str": "HD Reel MP4",
+                    "direct_url": vu,
+                    "label": f"MP4 HD Reel{suffix}",
+                    "badge": "FHD",
+                })
+
+            # Carousel / image posts fallback
+            if not combined and display_urls:
+                for idx_i, iu in enumerate(display_urls[:10], 1):
+                    combined.append({
+                        "format_id": f"direct::{iu}",
+                        "ext": "JPG",
+                        "quality": f"HD Photo #{idx_i}",
+                        "height": 1080,
+                        "fps": 0,
+                        "category": "combined",
+                        "has_audio": False,
+                        "has_video": False,
+                        "is_image": True,
+                        "filesize": None,
+                        "filesize_str": "HD Image",
+                        "direct_url": iu,
+                        "label": f"JPG Instagram Photo #{idx_i}",
+                        "badge": "IMG",
+                    })
+
+            if combined:
+                thumb = display_urls[0] if display_urls else ""
+                payload = {
+                    "id": shortcode,
+                    "title": caption,
+                    "uploader": f"@{username}",
+                    "thumbnail": thumb,
+                    "duration": 0,
+                    "duration_str": "Reel HD" if video_urls else "Post",
+                    "view_count": None,
+                    "webpage_url": f"https://www.instagram.com/reel/{shortcode}/",
+                    "extractor": "Instagram",
+                    "has_ffmpeg": FFMPEG_PATH is not None,
+                    "formats": {"combined": combined, "video_only": [], "audio": []},
+                }
+                _cache_set_info(url, payload, {})
+                return payload
+        except Exception:
+            continue
+
+    raise ValueError("Unable to extract this Instagram post. Make sure the Reel or post is public.")
+
+
+def extract_reddit_media(url: str):
+    """
+    Permanent Cloud-Safe Reddit Video + Audio Extractor.
+    Resolves /s/ mobile share links and extracts v.redd.it HLS (with audio) + CMAF/DASH MP4 via Arctic-Shift & Embed APIs.
+    """
+    resolved = url
+    if "/s/" in url or "redd.it/" in url:
+        try:
+            r_req = urllib.request.Request(url, headers={"User-Agent": MOBILE_SAFARI_UA})
+            with urllib.request.urlopen(r_req, timeout=8) as r_resp:
+                resolved = r_resp.geturl() or url
+        except Exception:
+            pass
+
+    post_m = re.search(r"/comments/([a-z0-9]+)", resolved, re.IGNORECASE)
+    if post_m:
+        post_id = post_m.group(1)
+        try:
+            ar_url = f"https://arctic-shift.photon-reddit.com/api/posts/ids?ids={post_id}"
+            req = urllib.request.Request(ar_url, headers={"User-Agent": BROWSER_UA, "Accept": "application/json"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                ar_json = json.loads(resp.read().decode("utf-8", errors="ignore"))
+            items = ar_json.get("data") or []
+            if items:
+                pd = items[0]
+                title = pd.get("title") or f"Reddit Video ({post_id})"
+                uploader = f"u/{pd.get('author', 'redditor')} • r/{pd.get('subreddit', 'videos')}"
+                thumb = pd.get("thumbnail") if str(pd.get("thumbnail", "")).startswith("http") else ""
+                preview_imgs = ((pd.get("preview") or {}).get("images") or [])
+                if preview_imgs and preview_imgs[0].get("source", {}).get("url"):
+                    thumb = html.unescape(preview_imgs[0]["source"]["url"])
+
+                media = pd.get("secure_media") or pd.get("media") or {}
+                rv = media.get("reddit_video") or {}
+                if not rv and pd.get("crosspost_parent_list"):
+                    cp = pd["crosspost_parent_list"][0]
+                    rv = ((cp.get("secure_media") or cp.get("media") or {}).get("reddit_video")) or {}
+
+                fallback_mp4 = (rv.get("fallback_url") or "").split("?")[0]
+                hls_url = rv.get("hls_url") or ""
+                duration = int(rv.get("duration") or 0)
+                height = int(rv.get("height") or 720)
+
+                combined = []
+                # Option 1: Full Video + Audio merged via HLS playlist using yt-dlp + FFmpeg
+                if hls_url:
+                    combined.append({
+                        "format_id": "bestvideo+bestaudio/best",
+                        "ext": "MP4",
+                        "quality": f"{height}p HD (With Sound)",
+                        "height": height,
+                        "fps": 30,
+                        "category": "combined",
+                        "has_audio": True,
+                        "has_video": True,
+                        "filesize": None,
+                        "filesize_str": "Video + Audio",
+                        "direct_url": "",
+                        "label": f"MP4 {height}p (With Audio)",
+                        "badge": "HD",
+                    })
+                if fallback_mp4:
+                    combined.append({
+                        "format_id": f"direct::{fallback_mp4}",
+                        "ext": "MP4",
+                        "quality": f"{height}p Direct MP4",
+                        "height": height,
+                        "fps": 30,
+                        "category": "combined",
+                        "has_audio": False,
+                        "has_video": True,
+                        "filesize": None,
+                        "filesize_str": "Direct Stream",
+                        "direct_url": fallback_mp4,
+                        "label": f"MP4 {height}p (Fast Direct)",
+                        "badge": "MP4",
+                    })
+                if combined:
+                    # Point webpage_url to hls_url when merging so /api/download-stream merges v.redd.it directly without touching reddit.com!
+                    dl_target = hls_url or fallback_mp4
+                    payload = {
+                        "id": post_id,
+                        "title": title,
+                        "uploader": uploader,
+                        "thumbnail": thumb,
+                        "duration": duration,
+                        "duration_str": format_duration(duration) if duration else "HD",
+                        "view_count": pd.get("score"),
+                        "webpage_url": dl_target,
+                        "extractor": "Reddit",
+                        "has_ffmpeg": FFMPEG_PATH is not None,
+                        "formats": {"combined": combined, "video_only": [], "audio": []},
+                    }
+                    _cache_set_info(url, payload, {})
+                    return payload
+        except Exception:
+            pass
+
+    raise ValueError("Could not extract video from this Reddit post. Ensure the post contains a public Reddit video.")
 
 
 def sanitize_filename(name: str) -> str:
@@ -3327,19 +3756,38 @@ def get_video_info():
         try:
             return jsonify(extract_tiktok_media(url))
         except Exception:
-            pass  # Fall through to yt-dlp proxy pool as final backup
+            pass
+
+    if is_twitter_url(raw_url) or is_twitter_url(url):
+        try:
+            return jsonify(extract_twitter_media(url))
+        except Exception:
+            pass
+
+    if is_instagram_url(raw_url) or is_instagram_url(url):
+        try:
+            return jsonify(extract_instagram_media(url))
+        except Exception:
+            pass
+
+    if is_reddit_url(raw_url) or is_reddit_url(url):
+        try:
+            return jsonify(extract_reddit_media(url))
+        except Exception:
+            pass
 
     is_pin = is_pinterest_url(url)
 
-    ydl_opts = get_base_ydl_opts()
+    ydl_opts = get_base_ydl_opts(url)
     ydl_opts["extract_flat"] = False
 
     info = None
     ydl_error = None
-    max_info_tries = max(1, min(len(get_proxy_list()), 4))
+    plist_now = get_proxy_list() if is_youtube_url(url) else []
+    max_info_tries = max(1, min(len(plist_now), 3))
     for _info_try in range(max_info_tries):
         try:
-            cur_opts = get_base_ydl_opts()
+            cur_opts = get_base_ydl_opts(url)
             cur_opts["extract_flat"] = False
             with yt_dlp.YoutubeDL(cur_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
@@ -3347,16 +3795,23 @@ def get_video_info():
                 break
         except Exception as e:
             ydl_error = re.sub(r"\x1b\[[0-9;]*m", "", str(e))
-            advance_proxy()
+            advance_proxy(ydl_error)
+            if "402" in ydl_error or "Payment Required" in ydl_error:
+                break
+    # Direct proxy-free fallback (works for Facebook, Vimeo, Dailymotion, and YouTube via android_vr when proxy is 402!)
     if info is None:
-        try:
-            vr_opts = get_base_ydl_opts()
-            vr_opts["extract_flat"] = False
-            vr_opts["extractor_args"] = {"youtube": {"player_client": ["android", "android_embedded", "web_embedded"]}}
-            with yt_dlp.YoutubeDL(vr_opts) as ydl:
-                info = ydl.extract_info(url, download=False)
-        except Exception:
-            pass
+        for client_list in (["android_vr", "web_embedded"], ["android", "ios"]):
+            try:
+                vr_opts = get_base_ydl_opts(url, allow_proxy=False)
+                vr_opts["extract_flat"] = False
+                if is_youtube_url(url):
+                    vr_opts["extractor_args"] = {"youtube": {"player_client": client_list}}
+                with yt_dlp.YoutubeDL(vr_opts) as ydl:
+                    info = ydl.extract_info(url, download=False)
+                if info:
+                    break
+            except Exception as fb_e:
+                ydl_error = re.sub(r"\x1b\[[0-9;]*m", "", str(fb_e))
 
     if info is None:
         if is_pin:
@@ -3983,8 +4438,13 @@ def run_download_job(job_id: str, url: str, format_id: str, title: str, ext_hint
 def _stream_remote_media(media_url, filename, extra_headers=None, use_proxy=False):
     """Stream a remote media URL directly to the client in 256KB chunks (zero /tmp buffering)."""
     req_headers = {"User-Agent": BROWSER_UA, "Accept": "*/*"}
-    if any(d in (media_url or "").lower() for d in ("tiktok", "tikwm", "byteoversea", "ibytedtos", "muscdn")):
+    m_low = (media_url or "").lower()
+    if any(d in m_low for d in ("tiktok", "tikwm", "byteoversea", "ibytedtos", "muscdn")):
         req_headers["Referer"] = "https://www.tiktok.com/"
+    elif any(d in m_low for d in ("instagram", "cdninstagram", "fbcdn.net")):
+        req_headers["Referer"] = "https://www.instagram.com/"
+    elif "twimg.com" in m_low:
+        req_headers["Referer"] = "https://x.com/"
     if extra_headers:
         for k, v in extra_headers.items():
             if k.lower() not in ("host", "accept-encoding", "content-length"):
@@ -4098,7 +4558,7 @@ def download_stream():
     os.makedirs(job_dir, exist_ok=True)
     outtmpl = os.path.join(job_dir, "media_out.%(ext)s")
 
-    ydl_opts = get_base_ydl_opts()
+    ydl_opts = get_base_ydl_opts(url)
     target_format = "bestaudio[ext=m4a]/bestaudio/best" if is_audio_only else format_id
     ydl_opts.update({
         "format": target_format,
@@ -4120,35 +4580,40 @@ def download_stream():
 
     try:
         last_exc = None
-        max_dl_tries = max(2, min(len(get_proxy_list()), 4))
+        plist_dl = get_proxy_list() if is_youtube_url(url) else []
+        max_dl_tries = max(1, min(len(plist_dl), 3))
         for _attempt in range(max_dl_tries):
             try:
                 cur_dl_opts = dict(ydl_opts)
-                plist = get_proxy_list()
-                if plist:
-                    cur_dl_opts["proxy"] = plist[_ACTIVE_PROXY_IDX[0] % len(plist)]
+                if plist_dl and time.time() >= _PROXY_DEAD_UNTIL[0]:
+                    cur_dl_opts["proxy"] = plist_dl[_ACTIVE_PROXY_IDX[0] % len(plist_dl)]
+                else:
+                    cur_dl_opts.pop("proxy", None)
                 with yt_dlp.YoutubeDL(cur_dl_opts) as ydl:
                     ydl.download([url])
                 last_exc = None
                 break
             except Exception as att_e:
                 last_exc = att_e
-                advance_proxy()
+                advance_proxy(str(att_e))
                 for leftover in os.listdir(job_dir):
                     try:
                         os.remove(os.path.join(job_dir, leftover))
                     except Exception:
                         pass
+                if "402" in str(att_e) or "Payment Required" in str(att_e):
+                    break
         if last_exc:
             raise last_exc
     except Exception as e:
         try:
-            fb_opts = get_base_ydl_opts()
+            fb_opts = get_base_ydl_opts(url, allow_proxy=False)
             fb_opts.update({
-                "format": "18/96-0/95-0/94-0/best[ext=mp4]/best",
+                "format": target_format if not is_youtube_url(url) else "18/96-0/95-0/94-0/best[ext=mp4]/best",
                 "outtmpl": outtmpl,
-                "extractor_args": {"youtube": {"player_client": ["android", "android_embedded"]}},
             })
+            if is_youtube_url(url):
+                fb_opts["extractor_args"] = {"youtube": {"player_client": ["android_vr", "android", "web_embedded"]}}
             if FFMPEG_PATH and not is_audio_only:
                 fb_opts["merge_output_format"] = "mp4"
             with yt_dlp.YoutubeDL(fb_opts) as ydl:

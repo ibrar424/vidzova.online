@@ -264,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Paste your Facebook video or Reel link here...";
       if (activeSampleChip) {
         activeSampleChip.textContent = "📘 Facebook Sample Video";
-        activeSampleChip.dataset.url = "https://www.youtube.com/watch?v=jNQXAC9IVRw";
+        activeSampleChip.dataset.url = "https://www.facebook.com/facebook/videos/10153231379946729/";
         activeSampleChip.className = "sf-sample-chip sf-chip-fb";
       }
       if (howToHeading) {
@@ -278,7 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Paste your Instagram Reel, Story, or video link here...";
       if (activeSampleChip) {
         activeSampleChip.textContent = "📸 Instagram Sample Video";
-        activeSampleChip.dataset.url = "https://www.youtube.com/watch?v=jNQXAC9IVRw";
+        activeSampleChip.dataset.url = "https://www.instagram.com/reel/DfznlitzL1O/";
         activeSampleChip.className = "sf-sample-chip sf-chip-ig";
       }
       if (howToHeading) {
@@ -320,7 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Paste your Twitter or X video link here (e.g., https://x.com/...)...";
       if (activeSampleChip) {
         activeSampleChip.textContent = "𝕏 Twitter / X Sample";
-        activeSampleChip.dataset.url = "https://x.com/Twitter/status/1700000000000000000";
+        activeSampleChip.dataset.url = "https://x.com/NASA/status/2105842656429432894";
         activeSampleChip.className = "sf-sample-chip sf-chip-tw";
       }
       if (howToHeading) {
@@ -475,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (tryFacebookBtn) {
     tryFacebookBtn.addEventListener("click", () => {
-      const sampleFb = "https://www.youtube.com/watch?v=jNQXAC9IVRw";
+      const sampleFb = "https://www.facebook.com/facebook/videos/10153231379946729/";
       setActivePlatform("Facebook", true, true);
       videoUrlInput.value = sampleFb;
       clearInputBtn.classList.remove("hidden");
@@ -485,7 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (tryInstagramBtn) {
     tryInstagramBtn.addEventListener("click", () => {
-      const sampleIg = "https://www.youtube.com/watch?v=jNQXAC9IVRw";
+      const sampleIg = "https://www.instagram.com/reel/DfznlitzL1O/";
       setActivePlatform("Instagram", true, true);
       videoUrlInput.value = sampleIg;
       clearInputBtn.classList.remove("hidden");
@@ -525,7 +525,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (tryTwitterBtn) {
     tryTwitterBtn.addEventListener("click", () => {
-      const sampleTw = "https://x.com/Twitter/status/1700000000000000000";
+      const sampleTw = "https://x.com/NASA/status/2105842656429432894";
       setActivePlatform("Twitter", true, true);
       videoUrlInput.value = sampleTw;
       clearInputBtn.classList.remove("hidden");
