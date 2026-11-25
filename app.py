@@ -2158,6 +2158,17 @@ def serve_sitemap():
     return send_from_directory(app.static_folder, "sitemap.xml", mimetype="application/xml")
 
 
+@app.route("/rss.xml")
+@app.route("/feed.xml")
+def serve_rss_feed():
+    return send_from_directory(app.static_folder, "rss.xml", mimetype="application/rss+xml; charset=utf-8")
+
+
+@app.route("/vidzova8f4a2c9e1b7d3f6a5c0e9b2d4.txt")
+def serve_indexnow_key():
+    return Response("vidzova8f4a2c9e1b7d3f6a5c0e9b2d4", mimetype="text/plain; charset=utf-8")
+
+
 @app.route("/robots.txt")
 def serve_robots():
     return send_from_directory(app.static_folder, "robots.txt", mimetype="text/plain")
