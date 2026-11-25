@@ -292,7 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Paste your TikTok video link here (e.g., https://www.tiktok.com/@...)...";
       if (activeSampleChip) {
         activeSampleChip.textContent = "🎵 TikTok Sample Video";
-        activeSampleChip.dataset.url = "https://www.youtube.com/watch?v=jNQXAC9IVRw";
+        activeSampleChip.dataset.url = "https://www.tiktok.com/@tiktok/video/7106594312292453675";
         activeSampleChip.className = "sf-sample-chip sf-chip-tt";
       }
       if (howToHeading) {
@@ -495,7 +495,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (tryTikTokBtn) {
     tryTikTokBtn.addEventListener("click", () => {
-      const sampleTt = "https://www.youtube.com/watch?v=jNQXAC9IVRw";
+      const sampleTt = "https://www.tiktok.com/@tiktok/video/7106594312292453675";
       setActivePlatform("TikTok", true, true);
       videoUrlInput.value = sampleTt;
       clearInputBtn.classList.remove("hidden");

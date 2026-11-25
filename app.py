@@ -181,6 +181,10 @@ def is_snapchat_url(url: str) -> bool:
     return bool(re.search(r"(^|//|\.)(snapchat\.com|story\.snapchat\.com)/", url, re.IGNORECASE))
 
 
+def is_tiktok_url(url: str) -> bool:
+    return bool(re.search(r"(^|//|\.)(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)/", url, re.IGNORECASE))
+
+
 def resolve_pinterest_url(url: str) -> str:
     """Expand pin.it short links and normalize Pinterest pin URLs."""
     try:
@@ -202,10 +206,15 @@ def resolve_pinterest_url(url: str) -> str:
 
 
 def normalize_url(url: str) -> str:
-    """Normalize URLs including 'ssyoutube.com', 'sfrom.net/', 'pin.it/', and raw Amazon ASINs."""
-    url = url.strip()
+    """Normalize URLs including mobile share captions, 'ssyoutube.com', 'sfrom.net/', 'pin.it/', and raw Amazon ASINs."""
+    url = (url or "").strip()
     if not url:
         return ""
+    # Extract clean URL if user pasted mobile Share text (e.g. "Funny clip! https://vt.tiktok.com/ZS... #fyp")
+    if " " in url or "\n" in url or "\t" in url:
+        embedded = re.search(r"https?://[^\s<>\'\"]+", url, re.IGNORECASE)
+        if embedded:
+            url = embedded.group(0).rstrip(".,;!)")
     # Raw 10-character Amazon ASIN (e.g. B098XNCHLD)
     if re.match(r"^B0[A-Z0-9]{8}$", url, re.IGNORECASE):
         return f"https://www.amazon.co.uk/dp/{url.upper()}"
@@ -923,6 +932,249 @@ def extract_snapchat_media(url: str):
             ],
         },
     }
+
+
+def extract_tiktok_media(url: str):
+    """
+    Permanent Multi-Engine TikTok Extractor (Videos, Reels, Short Links vt/vm.tiktok.com, MP3 Audio & Photo Slideshows).
+    Engine 1a: TikWM HD API (1080p HD No-Watermark + 720p No-Watermark + Original MP3 + Photo Slideshows)
+    Engine 1b: TikWM Fast POST fallback (with proxy pool retry if needed)
+    Engine 2: TikTok Embed v2 + oEmbed direct scraper
+    """
+    def _abs_tikwm(u_val):
+        if not u_val:
+            return ""
+        if u_val.startswith("/"):
+            return "https://www.tikwm.com" + u_val
+        return u_val
+
+    tikwm_data = None
+    # Engine 1a & 1b: TikWM HD GET then fast POST (plus proxy fallback if direct fails)
+    attempts = [
+        ("GET", f"https://www.tikwm.com/api/?url={urllib.parse.quote(url, safe='')}&hd=1", None, False),
+        ("POST", "https://www.tikwm.com/api/", urllib.parse.urlencode({"url": url, "count": 12, "cursor": 0, "web": 1, "hd": 1}).encode("utf-8"), False),
+        ("GET", f"https://www.tikwm.com/api/?url={urllib.parse.quote(url, safe='')}", None, True),
+    ]
+    for method, api_endpoint, body_bytes, use_px in attempts:
+        try:
+            headers = {
+                "User-Agent": BROWSER_UA,
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://www.tikwm.com/",
+            }
+            if body_bytes is not None:
+                headers["Content-Type"] = "application/x-www-form-urlencoded; charset=UTF-8"
+            req = urllib.request.Request(api_endpoint, data=body_bytes, headers=headers, method=method)
+            opener = urllib.request.build_opener()
+            if use_px:
+                plist = get_proxy_list()
+                if plist:
+                    px = plist[_ACTIVE_PROXY_IDX[0] % len(plist)]
+                    opener = urllib.request.build_opener(urllib.request.ProxyHandler({"http": px, "https": px}))
+            with opener.open(req, timeout=12) as resp:
+                parsed = json.loads(resp.read().decode("utf-8", errors="ignore"))
+            if isinstance(parsed, dict) and parsed.get("code") == 0 and parsed.get("data"):
+                tikwm_data = parsed["data"]
+                break
+        except Exception:
+            continue
+
+    if tikwm_data:
+        vid_id = str(tikwm_data.get("id") or int(time.time()))
+        raw_title = (tikwm_data.get("title") or "").strip()
+        author_obj = tikwm_data.get("author") or {}
+        uploader = author_obj.get("nickname") or author_obj.get("unique_id") or "TikTok Creator"
+        unique_id = author_obj.get("unique_id") or "tiktok"
+        title = raw_title or f"TikTok Video by @{unique_id}"
+        thumb = _abs_tikwm(tikwm_data.get("origin_cover") or tikwm_data.get("cover") or tikwm_data.get("ai_dynamic_cover"))
+        duration = int(tikwm_data.get("duration") or 0)
+        views = tikwm_data.get("play_count")
+
+        hd_url = _abs_tikwm(tikwm_data.get("hdplay"))
+        play_url = _abs_tikwm(tikwm_data.get("play"))
+        wm_url = _abs_tikwm(tikwm_data.get("wmplay"))
+        music_url = _abs_tikwm(tikwm_data.get("music"))
+        if not music_url and isinstance(tikwm_data.get("music_info"), dict):
+            music_url = _abs_tikwm(tikwm_data["music_info"].get("play"))
+        hd_size = tikwm_data.get("hd_size")
+        sd_size = tikwm_data.get("size")
+        wm_size = tikwm_data.get("wm_size")
+        images = tikwm_data.get("images") or []
+
+        combined = []
+        if hd_url:
+            combined.append({
+                "format_id": f"direct::{hd_url}",
+                "ext": "MP4",
+                "quality": "1080p HD (No Watermark)",
+                "height": 1080,
+                "fps": 30,
+                "category": "combined",
+                "has_audio": True,
+                "has_video": True,
+                "filesize": hd_size,
+                "filesize_str": format_bytes(hd_size) or "HD MP4",
+                "direct_url": hd_url,
+                "label": "MP4 1080p HD (No Watermark)",
+                "badge": "FHD",
+            })
+        if play_url and play_url != hd_url:
+            combined.append({
+                "format_id": f"direct::{play_url}",
+                "ext": "MP4",
+                "quality": "720p HD (No Watermark)",
+                "height": 720,
+                "fps": 30,
+                "category": "combined",
+                "has_audio": True,
+                "has_video": True,
+                "filesize": sd_size,
+                "filesize_str": format_bytes(sd_size) or "No Watermark",
+                "direct_url": play_url,
+                "label": "MP4 720p (No Watermark)",
+                "badge": "HD",
+            })
+        if wm_url and wm_url not in (hd_url, play_url):
+            combined.append({
+                "format_id": f"direct::{wm_url}",
+                "ext": "MP4",
+                "quality": "540p (Watermarked)",
+                "height": 540,
+                "fps": 30,
+                "category": "combined",
+                "has_audio": True,
+                "has_video": True,
+                "filesize": wm_size,
+                "filesize_str": format_bytes(wm_size) or "MP4",
+                "direct_url": wm_url,
+                "label": "MP4 (With Watermark)",
+                "badge": "SD",
+            })
+
+        # Support TikTok Photo Mode / Slideshows
+        for idx_img, img_u in enumerate(images[:20], 1):
+            if img_u:
+                combined.append({
+                    "format_id": f"direct::{img_u}",
+                    "ext": "JPG",
+                    "quality": f"Slide {idx_img} HD",
+                    "height": 1080,
+                    "fps": 0,
+                    "category": "combined",
+                    "has_audio": False,
+                    "has_video": False,
+                    "is_image": True,
+                    "filesize": None,
+                    "filesize_str": "HD Photo",
+                    "direct_url": img_u,
+                    "label": f"Photo Slide {idx_img} (No Watermark)",
+                    "badge": "IMG",
+                })
+
+        audio_list = []
+        if music_url:
+            audio_list.append({
+                "format_id": f"direct::{music_url}",
+                "ext": "MP3",
+                "quality": "Original Sound (MP3)",
+                "abr": 192,
+                "category": "audio",
+                "has_audio": True,
+                "has_video": False,
+                "filesize": None,
+                "filesize_str": "Original Audio",
+                "direct_url": music_url,
+                "label": "MP3 Original TikTok Audio",
+                "badge": "MP3",
+            })
+
+        if combined or audio_list:
+            canonical_tt = f"https://www.tiktok.com/@{unique_id}/video/{vid_id}" if vid_id.isdigit() else url
+            payload = {
+                "id": vid_id,
+                "title": title,
+                "uploader": uploader,
+                "thumbnail": thumb,
+                "duration": duration,
+                "duration_str": format_duration(duration) if duration else ("Slideshow" if images else "HD"),
+                "view_count": views,
+                "webpage_url": canonical_tt,
+                "extractor": "TikTok",
+                "has_ffmpeg": FFMPEG_PATH is not None,
+                "formats": {
+                    "combined": combined or audio_list,
+                    "video_only": [],
+                    "audio": audio_list,
+                },
+            }
+            _cache_set_info(url, payload, {})
+            if canonical_tt != url:
+                _cache_set_info(canonical_tt, payload, {})
+            return payload
+
+    # Engine 2: Direct TikTok Embed v2 + oEmbed scraper fallback
+    resolved_url = url
+    if any(sh in url.lower() for sh in ("vt.tiktok.com", "vm.tiktok.com", "/t/")):
+        try:
+            r_req = urllib.request.Request(url, headers={"User-Agent": MOBILE_SAFARI_UA})
+            with urllib.request.urlopen(r_req, timeout=8) as r_resp:
+                resolved_url = r_resp.geturl() or url
+        except Exception:
+            pass
+
+    vid_m = re.search(r"/(?:video|photo|v)/(\d+)", resolved_url)
+    if vid_m:
+        tt_id = vid_m.group(1)
+        try:
+            emb_req = urllib.request.Request(
+                f"https://www.tiktok.com/embed/v2/{tt_id}",
+                headers={"User-Agent": BROWSER_UA, "Accept-Language": "en-US,en;q=0.9"},
+            )
+            with urllib.request.urlopen(emb_req, timeout=10) as emb_resp:
+                emb_html = emb_resp.read().decode("utf-8", errors="ignore")
+            play_m = re.search(r'"playAddr"\s*:\s*"([^"]+)"', emb_html) or re.search(r'"url_list"\s*:\s*\["(https:[^"]+)"', emb_html)
+            if play_m:
+                v_url = play_m.group(1).encode("utf-8").decode("unicode_escape").replace("\u0026", "&").replace(r"\/", "/")
+                t_m = re.search(r'"desc"\s*:\s*"([^"]*)"', emb_html)
+                c_m = re.search(r'"cover"\s*:\s*"([^"]+)"', emb_html)
+                tt_title = t_m.group(1) if t_m else f"TikTok Video {tt_id}"
+                tt_thumb = c_m.group(1).replace("\u0026", "&").replace(r"\/", "/") if c_m else ""
+                payload = {
+                    "id": tt_id,
+                    "title": tt_title,
+                    "uploader": "TikTok Creator",
+                    "thumbnail": tt_thumb,
+                    "duration": 0,
+                    "duration_str": "HD",
+                    "view_count": None,
+                    "webpage_url": resolved_url,
+                    "extractor": "TikTok",
+                    "has_ffmpeg": FFMPEG_PATH is not None,
+                    "formats": {
+                        "combined": [{
+                            "format_id": f"direct::{v_url}",
+                            "ext": "MP4",
+                            "quality": "HD (No Watermark)",
+                            "height": 1080,
+                            "fps": 30,
+                            "category": "combined",
+                            "has_audio": True,
+                            "has_video": True,
+                            "filesize_str": "HD MP4",
+                            "direct_url": v_url,
+                            "label": "MP4 HD (No Watermark)",
+                            "badge": "HD",
+                        }],
+                        "video_only": [],
+                        "audio": [],
+                    },
+                }
+                _cache_set_info(url, payload, {})
+                return payload
+        except Exception:
+            pass
+
+    raise ValueError("Unable to extract this TikTok link. Please check that the TikTok video is public.")
 
 
 def sanitize_filename(name: str) -> str:
@@ -3071,6 +3323,12 @@ def get_video_info():
         except Exception as e:
             return jsonify({"error": f"Unable to extract Snapchat video: {e}"}), 400
 
+    if is_tiktok_url(raw_url) or is_tiktok_url(url):
+        try:
+            return jsonify(extract_tiktok_media(url))
+        except Exception:
+            pass  # Fall through to yt-dlp proxy pool as final backup
+
     is_pin = is_pinterest_url(url)
 
     ydl_opts = get_base_ydl_opts()
@@ -3725,6 +3983,8 @@ def run_download_job(job_id: str, url: str, format_id: str, title: str, ext_hint
 def _stream_remote_media(media_url, filename, extra_headers=None, use_proxy=False):
     """Stream a remote media URL directly to the client in 256KB chunks (zero /tmp buffering)."""
     req_headers = {"User-Agent": BROWSER_UA, "Accept": "*/*"}
+    if any(d in (media_url or "").lower() for d in ("tiktok", "tikwm", "byteoversea", "ibytedtos", "muscdn")):
+        req_headers["Referer"] = "https://www.tiktok.com/"
     if extra_headers:
         for k, v in extra_headers.items():
             if k.lower() not in ("host", "accept-encoding", "content-length"):
@@ -3792,6 +4052,8 @@ def download_stream():
     # FAST PATH 1: Direct static media URL (Pinterest, Amazon, Alibaba, Snapchat, TikTok, etc.) -> Instant <1s streaming!
     if not direct_url and (format_id or "").startswith("direct::"):
         direct_url = format_id.split("direct::", 1)[1]
+    elif not direct_url and (format_id or "").startswith("direct:"):
+        direct_url = format_id.split("direct:", 1)[1]
     if direct_url and direct_url.startswith(("http://", "https://")) and not any(x in direct_url for x in ["googlevideo.com", "hls_playlist", ".m3u8"]):
         try:
             return _stream_remote_media(direct_url, f"{safe_title}.{ext_out}", use_proxy=False)
