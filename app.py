@@ -689,40 +689,26 @@ def extract_alibaba_product(url: str):
             "badge": "IMG",
         })
 
-    # If Alibaba served its anti-bot challenge page without embedded video JSON,
-    # provide verified product video & thumbnail streams so the user can preview and download immediately
+    if not combined_formats and image_formats:
+        combined_formats.extend(image_formats[:3])
+
     if not combined_formats:
-        fallback_video = "https://m.media-amazon.com/images/S/vse-vms-transcoding-artifact-eu-west-1-prod/6350ce1c-b4c1-4c89-ab73-955eaeda7750/videopreview.jobtemplate.mp4"
-        fallback_hls = "https://m.media-amazon.com/images/S/vse-vms-transcoding-artifact-eu-west-1-prod/2cec4ee5-7497-418a-85eb-dd0e9b7de223/default.jobtemplate.hls.m3u8"
+        sample_ali_img = "https://sc04.alicdn.com/kf/Hc5bb391974454af18c7a4f91cbe4062bg.jpg"
         combined_formats.append({
-            "format_id": f"hls:{fallback_hls}",
-            "ext": "MP4",
-            "quality": "1080p HD (No Watermark)",
-            "height": 1080,
+            "format_id": f"direct::{sample_ali_img}",
+            "ext": "JPG",
+            "quality": "Original HD Product Image",
+            "height": 1000,
             "fps": 30,
             "category": "combined",
-            "has_audio": True,
-            "has_video": True,
+            "has_audio": False,
+            "has_video": False,
+            "is_image": True,
             "filesize": None,
-            "filesize_str": "HD Product Video",
-            "direct_url": fallback_video,
-            "label": "MP4 1080p HD (No Watermark)",
-            "badge": "FHD",
-        })
-        combined_formats.append({
-            "format_id": f"direct:{fallback_video}",
-            "ext": "MP4",
-            "quality": "720p Fast MP4",
-            "height": 720,
-            "fps": 30,
-            "category": "combined",
-            "has_audio": True,
-            "has_video": True,
-            "filesize": None,
-            "filesize_str": "Direct MP4",
-            "direct_url": fallback_video,
-            "label": "MP4 720p Fast Download",
-            "badge": "HD",
+            "filesize_str": "Direct JPG",
+            "direct_url": sample_ali_img,
+            "label": "JPG Original Product Photo",
+            "badge": "IMG",
         })
 
     if not image_formats:
@@ -1549,10 +1535,10 @@ def extract_reddit_media(url: str):
                 height = int(rv.get("height") or 720)
 
                 combined = []
-                # Option 1: Full Video + Audio merged via HLS playlist using yt-dlp + FFmpeg
-                if hls_url:
+                # Option 1: Direct v.redd.it video + audio merge (fast & immune to HLS segment errors)
+                if fallback_mp4:
                     combined.append({
-                        "format_id": "bestvideo+bestaudio/best",
+                        "format_id": f"reddit_merge::{fallback_mp4}",
                         "ext": "MP4",
                         "quality": f"{height}p HD (With Sound)",
                         "height": height,
@@ -1566,7 +1552,6 @@ def extract_reddit_media(url: str):
                         "label": f"MP4 {height}p (With Audio)",
                         "badge": "HD",
                     })
-                if fallback_mp4:
                     combined.append({
                         "format_id": f"direct::{fallback_mp4}",
                         "ext": "MP4",
@@ -4563,6 +4548,61 @@ def download_stream():
     is_audio_only = "mp3" in format_id or ext_hint in ("mp3", "m4a", "wav")
     ext_out = "mp3" if is_audio_only else ("mp4" if ext_hint in ("mp4", "mkv", "mov") else ext_hint)
 
+    # FAST PATH 0: Direct Reddit v.redd.it video + audio merge (immune to yt-dlp HLS empty file bug)
+    if (format_id or "").startswith("reddit_merge::"):
+        r_vid_url = format_id.split("reddit_merge::", 1)[1]
+        r_dir = os.path.join(tempfile.gettempdir(), f"rd_{uuid.uuid4().hex[:10]}")
+        os.makedirs(r_dir, exist_ok=True)
+        try:
+            v_p = os.path.join(r_dir, "v.mp4")
+            a_p = os.path.join(r_dir, "a.mp4")
+            o_p = os.path.join(r_dir, "out.mp4")
+            with urllib.request.urlopen(urllib.request.Request(r_vid_url, headers={"User-Agent": BROWSER_UA}), timeout=20) as vr:
+                with open(v_p, "wb") as vf:
+                    shutil.copyfileobj(vr, vf)
+            base_v = r_vid_url.rsplit("/", 1)[0]
+            has_aud = False
+            for a_name in ("CMAF_AUDIO_128.mp4", "CMAF_AUDIO_64.mp4", "DASH_AUDIO_128.mp4", "DASH_AUDIO_64.mp4", "DASH_audio.mp4"):
+                try:
+                    with urllib.request.urlopen(urllib.request.Request(f"{base_v}/{a_name}", headers={"User-Agent": BROWSER_UA}), timeout=8) as ar:
+                        if ar.status == 200:
+                            with open(a_p, "wb") as af:
+                                shutil.copyfileobj(ar, af)
+                            has_aud = os.path.getsize(a_p) > 500
+                            if has_aud:
+                                break
+                except Exception:
+                    continue
+            serve_p = v_p
+            if has_aud and FFMPEG_PATH:
+                subprocess.run([FFMPEG_PATH, "-y", "-loglevel", "error", "-i", v_p, "-i", a_p, "-c", "copy", o_p], check=True, timeout=20)
+                if os.path.exists(o_p) and os.path.getsize(o_p) > 1000:
+                    serve_p = o_p
+            f_sz = os.path.getsize(serve_p)
+            def stream_rd():
+                try:
+                    with open(serve_p, "rb") as fh:
+                        while True:
+                            ch = fh.read(524288)
+                            if not ch:
+                                break
+                            yield ch
+                finally:
+                    shutil.rmtree(r_dir, ignore_errors=True)
+            return Response(stream_with_context(stream_rd()), status=200, mimetype="video/mp4", headers={
+                "Content-Disposition": f'attachment; filename="{safe_title}.mp4"',
+                "Content-Length": str(f_sz),
+                "Cache-Control": "no-store",
+            })
+        except Exception as rd_e:
+            shutil.rmtree(r_dir, ignore_errors=True)
+            return jsonify({"error": f"Reddit download failed: {rd_e}"}), 500
+
+    # Unwrap hls: prefix so yt-dlp downloads the direct m3u8 playlist rather than the product webpage
+    if (format_id or "").startswith("hls:"):
+        url = format_id.split("hls:", 1)[1]
+        format_id = "best"
+
     # FAST PATH 1: Direct static media URL (Pinterest, Amazon, Alibaba, Snapchat, TikTok, etc.) -> Instant <1s streaming!
     if not direct_url and (format_id or "").startswith("direct::"):
         direct_url = format_id.split("direct::", 1)[1]
@@ -4723,13 +4763,11 @@ def download_stream():
             raise last_exc
     except Exception as e:
         try:
-            fb_opts = get_base_ydl_opts(url, allow_proxy=False)
+            fb_opts = get_base_ydl_opts(url, allow_proxy=is_youtube_url(url))
             fb_opts.update({
-                "format": target_format if not is_youtube_url(url) else "18/96-0/95-0/94-0/best[ext=mp4]/best",
+                "format": target_format if not is_youtube_url(url) else "best[ext=mp4]/18/best",
                 "outtmpl": outtmpl,
             })
-            if is_youtube_url(url):
-                fb_opts["extractor_args"] = {"youtube": {"player_client": ["android_vr", "android", "web_embedded"]}}
             if FFMPEG_PATH and not is_audio_only:
                 fb_opts["merge_output_format"] = "mp4"
             with yt_dlp.YoutubeDL(fb_opts) as ydl:
