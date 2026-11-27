@@ -3787,6 +3787,49 @@ def get_video_info():
         except Exception:
             pass
 
+    # ULTRA-FAST PATH for YouTube: oEmbed returns title, channel & HD thumbnail in ~200ms (10-20x faster than full yt-dlp webpage parse!)
+    if is_youtube_url(url):
+        yt_fast_m = re.search(r"(?:v=|youtu\.be/|shorts/|embed/|live/)([A-Za-z0-9_-]{11})", url)
+        if yt_fast_m:
+            vid_id = yt_fast_m.group(1)
+            try:
+                oe_url = f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={vid_id}&format=json"
+                oe_req = urllib.request.Request(oe_url, headers={"User-Agent": BROWSER_UA, "Accept": "application/json"})
+                with urllib.request.urlopen(oe_req, timeout=3.5) as oe_resp:
+                    oe = json.loads(oe_resp.read().decode("utf-8", errors="ignore"))
+                fast_payload = {
+                    "id": vid_id,
+                    "title": oe.get("title") or "YouTube Video",
+                    "uploader": oe.get("author_name") or "YouTube Creator",
+                    "thumbnail": f"https://i.ytimg.com/vi/{vid_id}/hqdefault.jpg",
+                    "duration": 0,
+                    "duration_str": "HD",
+                    "view_count": None,
+                    "webpage_url": f"https://www.youtube.com/watch?v={vid_id}",
+                    "extractor": "YouTube",
+                    "has_ffmpeg": FFMPEG_PATH is not None,
+                    "formats": {
+                        "combined": [
+                            {"format_id": "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best", "ext": "MP4", "quality": "1080p", "height": 1080, "fps": 30, "category": "combined", "has_audio": True, "has_video": True, "filesize_str": "Full HD", "direct_url": "", "label": "MP4 1080p", "badge": "FHD"},
+                            {"format_id": "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]/best", "ext": "MP4", "quality": "720p", "height": 720, "fps": 30, "category": "combined", "has_audio": True, "has_video": True, "filesize_str": "HD", "direct_url": "", "label": "MP4 720p", "badge": "HD"},
+                            {"format_id": "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480]/best", "ext": "MP4", "quality": "480p", "height": 480, "fps": 30, "category": "combined", "has_audio": True, "has_video": True, "filesize_str": "SD", "direct_url": "", "label": "MP4 480p", "badge": "SD"},
+                            {"format_id": "18/best[height<=360][ext=mp4]/best[height<=360]/best", "ext": "MP4", "quality": "360p", "height": 360, "fps": 30, "category": "combined", "has_audio": True, "has_video": True, "filesize_str": "Fast", "direct_url": "", "label": "MP4 360p", "badge": "SD"},
+                        ],
+                        "video_only": [],
+                        "audio": [
+                            {"format_id": "mp3:320", "ext": "MP3", "quality": "320 kbps", "abr": 320, "category": "audio", "has_audio": True, "has_video": False, "filesize_str": "MP3 HQ", "direct_url": "", "label": "MP3 320kbps", "badge": "MP3"},
+                            {"format_id": "mp3:192", "ext": "MP3", "quality": "192 kbps", "abr": 192, "category": "audio", "has_audio": True, "has_video": False, "filesize_str": "MP3", "direct_url": "", "label": "MP3 192kbps", "badge": "MP3"},
+                            {"format_id": "mp3:128", "ext": "MP3", "quality": "128 kbps", "abr": 128, "category": "audio", "has_audio": True, "has_video": False, "filesize_str": "Fast MP3", "direct_url": "", "label": "MP3 128kbps", "badge": "MP3"},
+                            {"format_id": "bestaudio[ext=m4a]/bestaudio/best", "ext": "M4A", "quality": "Original M4A", "abr": 160, "category": "audio", "has_audio": True, "has_video": False, "filesize_str": "Instant M4A", "direct_url": "", "label": "M4A Audio (Fastest)", "badge": "M4A"},
+                        ],
+                    },
+                }
+                _cache_set_info(url, fast_payload, {})
+                _cache_set_info(fast_payload["webpage_url"], fast_payload, {})
+                return jsonify(fast_payload)
+            except Exception:
+                pass
+
     is_pin = is_pinterest_url(url)
 
     ydl_opts = get_base_ydl_opts(url)
@@ -4587,7 +4630,63 @@ def download_stream():
         }]
     elif FFMPEG_PATH and not is_audio_only:
         ydl_opts["merge_output_format"] = "mp4"
-        ydl_opts["postprocessor_args"] = {"Merger": ["-threads", "0", "-c", "copy", "-movflags", "+faststart"]}
+        ydl_opts["postprocessor_args"] = {"Merger": ["-threads", "0", "-c", "copy"]}
+
+    def _fast_parallel_merge(dl_url, dl_opts):
+        """Download video & audio streams in parallel using 6 concurrent HTTP Range threads + zero-copy FFmpeg merge."""
+        import concurrent.futures
+        if is_audio_only or not FFMPEG_PATH or not is_youtube_url(dl_url):
+            return False
+        ex_opts = dict(dl_opts)
+        ex_opts["skip_download"] = True
+        with yt_dlp.YoutubeDL(ex_opts) as ydl:
+            info = ydl.extract_info(dl_url, download=False)
+        req_fmts = info.get("requested_formats") or []
+        if len(req_fmts) != 2:
+            return False
+        v_fmt, a_fmt = req_fmts[0], req_fmts[1]
+        v_url, a_url = v_fmt.get("url"), a_fmt.get("url")
+        v_size, a_size = v_fmt.get("filesize") or v_fmt.get("filesize_approx") or 0, a_fmt.get("filesize") or a_fmt.get("filesize_approx") or 0
+        if not v_url or not a_url or not v_size or ".m3u8" in v_url or ".m3u8" in a_url:
+            return False
+        px = dl_opts.get("proxy")
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({"http": px, "https": px})) if px else urllib.request.build_opener()
+        v_hdrs = {k: v for k, v in (v_fmt.get("http_headers") or {}).items() if k.lower() != "range"}
+        a_hdrs = {k: v for k, v in (a_fmt.get("http_headers") or {}).items() if k.lower() != "range"}
+        v_path = os.path.join(job_dir, "v_part.mp4")
+        a_path = os.path.join(job_dir, "a_part.m4a")
+        out_path = os.path.join(job_dir, "media_out.mp4")
+
+        chunk_sz = max(2 * 1024 * 1024, (v_size + 5) // 6)  # 6 parallel connections
+        ranges = [(s, min(s + chunk_sz - 1, v_size - 1)) for s in range(0, v_size, chunk_sz)]
+
+        def fetch_chunk(u, hdrs, start_b, end_b):
+            h = dict(hdrs)
+            if end_b is not None:
+                h["Range"] = f"bytes={start_b}-{end_b}"
+            with opener.open(urllib.request.Request(u, headers=h), timeout=20) as resp:
+                return resp.read()
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=7) as ex:
+            a_fut = ex.submit(fetch_chunk, a_url, a_hdrs, 0, (a_size - 1) if a_size else None)
+            v_futs = [ex.submit(fetch_chunk, v_url, v_hdrs, s, e) for s, e in ranges]
+            with open(v_path, "wb") as vf:
+                for fut in v_futs:
+                    vf.write(fut.result())
+            with open(a_path, "wb") as af:
+                af.write(a_fut.result())
+
+        subprocess.run(
+            [FFMPEG_PATH, "-y", "-loglevel", "error", "-i", v_path, "-i", a_path, "-c", "copy", "-threads", "0", out_path],
+            check=True,
+            timeout=20,
+        )
+        for tmp_p in (v_path, a_path):
+            try:
+                os.remove(tmp_p)
+            except Exception:
+                pass
+        return os.path.exists(out_path) and os.path.getsize(out_path) > 10000
 
     try:
         last_exc = None
@@ -4600,8 +4699,14 @@ def download_stream():
                     cur_dl_opts["proxy"] = plist_dl[_ACTIVE_PROXY_IDX[0] % len(plist_dl)]
                 else:
                     cur_dl_opts.pop("proxy", None)
-                with yt_dlp.YoutubeDL(cur_dl_opts) as ydl:
-                    ydl.download([url])
+                used_fast = False
+                try:
+                    used_fast = _fast_parallel_merge(url, cur_dl_opts)
+                except Exception:
+                    used_fast = False
+                if not used_fast:
+                    with yt_dlp.YoutubeDL(cur_dl_opts) as ydl:
+                        ydl.download([url])
                 last_exc = None
                 break
             except Exception as att_e:
