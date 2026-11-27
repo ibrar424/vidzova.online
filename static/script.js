@@ -1648,4 +1648,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   } catch (e) {}
 
+
+  // Instant Page-Click Prefetch Fallback (for Safari / Firefox alongside Speculation Rules)
+  const _prefetched = new Set();
+  function prefetchInternalLink(e) {
+    const a = e.target && e.target.closest ? e.target.closest("a[href^='/']") : null;
+    if (!a) return;
+    const href = a.getAttribute("href");
+    if (!href || href.startsWith("/api/") || href.startsWith("/download") || href.includes("#") || _prefetched.has(href)) return;
+    _prefetched.add(href);
+    const link = document.createElement("link");
+    link.rel = "prefetch";
+    link.href = href;
+    document.head.appendChild(link);
+  }
+  document.addEventListener("pointerenter", prefetchInternalLink, true);
+  document.addEventListener("touchstart", prefetchInternalLink, { passive: true, capture: true });
+
 });

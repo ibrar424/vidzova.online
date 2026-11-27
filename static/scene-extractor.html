@@ -906,7 +906,35 @@
 
   <!-- Video Scene Extractor Modular Script -->
   <script src="/scene-extractor.js?v=41"></script>
-<script src="/i18n.js?v=42"></script>
+<script src="/i18n.js?v=42" defer></script>
   <script src="/pwa-install.js?v=1" defer></script>
+  <script type="speculationrules">
+  {
+    "prerender": [
+      {
+        "where": {
+          "and": [
+            { "href_matches": "/*" },
+            { "not": { "href_matches": "/api/*" } },
+            { "not": { "href_matches": "/download*" } }
+          ]
+        },
+        "eagerness": "moderate"
+      }
+    ],
+    "prefetch": [
+      {
+        "where": {
+          "and": [
+            { "href_matches": "/*" },
+            { "not": { "href_matches": "/api/*" } },
+            { "not": { "href_matches": "/download*" } }
+          ]
+        },
+        "eagerness": "eager"
+      }
+    ]
+  }
+  </script>
 </body>
 </html>
