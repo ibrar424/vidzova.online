@@ -35,18 +35,12 @@ def add_no_cache_headers(response):
     p = request.path or ""
     if p.endswith((".css", ".js")) and p != "/sw.js":
         response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
-        response.headers["CDN-Cache-Control"] = "public, max-age=31536000, immutable"
-        response.headers["Cloudflare-CDN-Cache-Control"] = "public, max-age=31536000, immutable"
         response.headers["Vercel-CDN-Cache-Control"] = "public, s-maxage=31536000, immutable"
     elif p.endswith((".ico", ".png", ".svg", ".webmanifest", ".webp", ".woff2")):
         response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
-        response.headers["CDN-Cache-Control"] = "public, max-age=31536000, immutable"
-        response.headers["Cloudflare-CDN-Cache-Control"] = "public, max-age=31536000, immutable"
         response.headers["Vercel-CDN-Cache-Control"] = "public, s-maxage=31536000, immutable"
     elif request.method == "GET" and not p.startswith("/api/") and response.mimetype == "text/html" and response.status_code == 200:
         response.headers["Cache-Control"] = "public, max-age=120, s-maxage=3600, stale-while-revalidate=86400"
-        response.headers["CDN-Cache-Control"] = "public, max-age=3600, stale-while-revalidate=86400"
-        response.headers["Cloudflare-CDN-Cache-Control"] = "public, max-age=3600, stale-while-revalidate=86400"
         response.headers["Vercel-CDN-Cache-Control"] = "public, s-maxage=3600, stale-while-revalidate=86400"
     return response
 
