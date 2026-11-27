@@ -3798,7 +3798,7 @@ def get_video_info():
                             {"format_id": "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best", "ext": "MP4", "quality": "1080p", "height": 1080, "fps": 30, "category": "combined", "has_audio": True, "has_video": True, "filesize_str": "Full HD", "direct_url": "", "label": "MP4 1080p", "badge": "FHD"},
                             {"format_id": "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]/best", "ext": "MP4", "quality": "720p", "height": 720, "fps": 30, "category": "combined", "has_audio": True, "has_video": True, "filesize_str": "HD", "direct_url": "", "label": "MP4 720p", "badge": "HD"},
                             {"format_id": "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480]/best", "ext": "MP4", "quality": "480p", "height": 480, "fps": 30, "category": "combined", "has_audio": True, "has_video": True, "filesize_str": "SD", "direct_url": "", "label": "MP4 480p", "badge": "SD"},
-                            {"format_id": "18/best[height<=360][ext=mp4]/best[height<=360]/best", "ext": "MP4", "quality": "360p", "height": 360, "fps": 30, "category": "combined", "has_audio": True, "has_video": True, "filesize_str": "Fast", "direct_url": "", "label": "MP4 360p", "badge": "SD"},
+                            {"format_id": "18/bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=360]+bestaudio/best[height<=360]/best", "ext": "MP4", "quality": "360p", "height": 360, "fps": 30, "category": "combined", "has_audio": True, "has_video": True, "filesize_str": "Fast", "direct_url": "", "label": "MP4 360p", "badge": "SD"},
                         ],
                         "video_only": [],
                         "audio": [
@@ -4765,7 +4765,7 @@ def download_stream():
         try:
             fb_opts = get_base_ydl_opts(url, allow_proxy=is_youtube_url(url))
             fb_opts.update({
-                "format": target_format if not is_youtube_url(url) else "best[ext=mp4]/18/best",
+                "format": target_format if not is_youtube_url(url) else "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[ext=mp4]/18/best",
                 "outtmpl": outtmpl,
             })
             if FFMPEG_PATH and not is_audio_only:
