@@ -1493,35 +1493,80 @@ def extract_instagram_media(url: str):
 
 def extract_reddit_media(url: str):
     """
-    Permanent Cloud-Safe Reddit Video + Audio Extractor.
-    Resolves /s/ mobile share links and extracts v.redd.it HLS (with audio) + CMAF/DASH MP4 via Arctic-Shift & Embed APIs.
+    Permanent Multi-Engine Cloud-Safe Reddit Video + Audio Extractor.
+    - Engine 1: Real-time vxReddit embed & /s/ share link resolver (works on brand-new 0-minute-old posts & /s/ mobile links without hitting Reddit 403 blocks)
+    - Engine 2: Arctic-Shift Reddit Post API (full metadata, duration, score, crossposts)
+    - Engine 3: Direct v.redd.it HLSPlaylist.m3u8 manifest parser (extracts all 1080p/720p/480p/360p CMAF/DASH video & 128kbps audio tracks directly from Fastly CDN)
     """
-    resolved = url
-    if "/s/" in url or "redd.it/" in url:
+    raw_u = (url or "").strip()
+    parsed_u = urllib.parse.urlparse(raw_u)
+    path_part = parsed_u.path or ""
+    post_m = re.search(r"/comments/([a-z0-9]+)", path_part, re.IGNORECASE)
+    if not post_m and "redd.it/" in raw_u.lower() and "v.redd.it/" not in raw_u.lower():
+        short_m = re.search(r"redd\.it/([a-z0-9]+)", raw_u, re.IGNORECASE)
+        if short_m:
+            post_m = short_m
+
+    vreddit_m = re.search(r"v\.redd\.it/([a-zA-Z0-9]+)", raw_u)
+    vreddit_id = vreddit_m.group(1) if vreddit_m else None
+    post_id = post_m.group(1) if post_m else None
+
+    title = None
+    uploader = "Reddit Creator"
+    thumb = ""
+    duration = 0
+    score = None
+    fallback_mp4 = ""
+
+    # Engine 1: Real-time vxReddit resolver (resolves /s/ mobile share links AND brand-new posts in real time!)
+    if not vreddit_id or "/s/" in path_part or not post_id:
         try:
-            r_req = urllib.request.Request(url, headers={"User-Agent": MOBILE_SAFARI_UA})
-            with urllib.request.urlopen(r_req, timeout=8) as r_resp:
-                resolved = r_resp.geturl() or url
+            vx_path = path_part if (path_part and not vreddit_id) else (f"/comments/{post_id}" if post_id else "")
+            if vx_path:
+                vx_req = urllib.request.Request(
+                    f"https://vxreddit.com{vx_path}",
+                    headers={"User-Agent": "TelegramBot (like TwitterBot)", "Accept": "text/html"},
+                )
+                with urllib.request.urlopen(vx_req, timeout=8) as vx_resp:
+                    vx_html = vx_resp.read().decode("utf-8", errors="ignore")
+                if not post_id:
+                    pm = re.search(r"/comments/([a-z0-9]+)", vx_html, re.IGNORECASE)
+                    if pm:
+                        post_id = pm.group(1)
+                vm = re.search(r"v\.redd\.it(?:%2F|/)([a-zA-Z0-9]+)", vx_html)
+                if vm and not vreddit_id:
+                    vreddit_id = vm.group(1)
+                tm = re.search(r'property="og:title"\s+content="([^"]+)"', vx_html)
+                if tm and tm.group(1) != "vxReddit":
+                    title = html.unescape(tm.group(1)).strip()
+                sm = re.search(r'property="og:site_name"\s+content="([^"]+)"', vx_html)
+                if sm:
+                    uploader = html.unescape(sm.group(1)).split(" - ")[0].strip()
+                im = re.search(r'property="og:image"\s+content="([^"]+)"', vx_html)
+                if im:
+                    thumb = html.unescape(im.group(1))
         except Exception:
             pass
 
-    post_m = re.search(r"/comments/([a-z0-9]+)", resolved, re.IGNORECASE)
-    if post_m:
-        post_id = post_m.group(1)
+    # Engine 2: Arctic-Shift API for rich post metadata (title, duration, score, fallback_url, crossposts)
+    if post_id:
         try:
             ar_url = f"https://arctic-shift.photon-reddit.com/api/posts/ids?ids={post_id}"
             req = urllib.request.Request(ar_url, headers={"User-Agent": BROWSER_UA, "Accept": "application/json"})
-            with urllib.request.urlopen(req, timeout=10) as resp:
+            with urllib.request.urlopen(req, timeout=8) as resp:
                 ar_json = json.loads(resp.read().decode("utf-8", errors="ignore"))
             items = ar_json.get("data") or []
             if items:
                 pd = items[0]
-                title = pd.get("title") or f"Reddit Video ({post_id})"
+                if not title or title == "vxReddit":
+                    title = pd.get("title") or f"Reddit Video ({post_id})"
                 uploader = f"u/{pd.get('author', 'redditor')} • r/{pd.get('subreddit', 'videos')}"
-                thumb = pd.get("thumbnail") if str(pd.get("thumbnail", "")).startswith("http") else ""
-                preview_imgs = ((pd.get("preview") or {}).get("images") or [])
-                if preview_imgs and preview_imgs[0].get("source", {}).get("url"):
-                    thumb = html.unescape(preview_imgs[0]["source"]["url"])
+                score = pd.get("score")
+                if not thumb:
+                    thumb = pd.get("thumbnail") if str(pd.get("thumbnail", "")).startswith("http") else ""
+                    preview_imgs = ((pd.get("preview") or {}).get("images") or [])
+                    if preview_imgs and preview_imgs[0].get("source", {}).get("url"):
+                        thumb = html.unescape(preview_imgs[0]["source"]["url"])
 
                 media = pd.get("secure_media") or pd.get("media") or {}
                 rv = media.get("reddit_video") or {}
@@ -1530,65 +1575,146 @@ def extract_reddit_media(url: str):
                     rv = ((cp.get("secure_media") or cp.get("media") or {}).get("reddit_video")) or {}
 
                 fallback_mp4 = (rv.get("fallback_url") or "").split("?")[0]
-                hls_url = rv.get("hls_url") or ""
                 duration = int(rv.get("duration") or 0)
-                height = int(rv.get("height") or 720)
-
-                combined = []
-                # Option 1: Direct v.redd.it video + audio merge (fast & immune to HLS segment errors)
-                if fallback_mp4:
-                    combined.append({
-                        "format_id": f"reddit_merge::{fallback_mp4}",
-                        "ext": "MP4",
-                        "quality": f"{height}p HD (With Sound)",
-                        "height": height,
-                        "fps": 30,
-                        "category": "combined",
-                        "has_audio": True,
-                        "has_video": True,
-                        "filesize": None,
-                        "filesize_str": "Video + Audio",
-                        "direct_url": "",
-                        "label": f"MP4 {height}p (With Audio)",
-                        "badge": "HD",
-                    })
-                    combined.append({
-                        "format_id": f"direct::{fallback_mp4}",
-                        "ext": "MP4",
-                        "quality": f"{height}p Direct MP4",
-                        "height": height,
-                        "fps": 30,
-                        "category": "combined",
-                        "has_audio": False,
-                        "has_video": True,
-                        "filesize": None,
-                        "filesize_str": "Direct Stream",
-                        "direct_url": fallback_mp4,
-                        "label": f"MP4 {height}p (Fast Direct)",
-                        "badge": "MP4",
-                    })
-                if combined:
-                    # Point webpage_url to hls_url when merging so /api/download-stream merges v.redd.it directly without touching reddit.com!
-                    dl_target = hls_url or fallback_mp4
-                    payload = {
-                        "id": post_id,
-                        "title": title,
-                        "uploader": uploader,
-                        "thumbnail": thumb,
-                        "duration": duration,
-                        "duration_str": format_duration(duration) if duration else "HD",
-                        "view_count": pd.get("score"),
-                        "webpage_url": dl_target,
-                        "extractor": "Reddit",
-                        "has_ffmpeg": FFMPEG_PATH is not None,
-                        "formats": {"combined": combined, "video_only": [], "audio": []},
-                    }
-                    _cache_set_info(url, payload, {})
-                    return payload
+                if not vreddit_id:
+                    for candidate_u in (fallback_mp4, rv.get("hls_url") or "", pd.get("url") or ""):
+                        vm = re.search(r"v\.redd\.it/([a-zA-Z0-9]+)", str(candidate_u))
+                        if vm:
+                            vreddit_id = vm.group(1)
+                            break
         except Exception:
             pass
 
-    raise ValueError("Could not extract video from this Reddit post. Ensure the post contains a public Reddit video.")
+    # If we have post_id but still haven't tried vxReddit (e.g. brand-new post not yet in Arctic-Shift)
+    if post_id and not vreddit_id:
+        try:
+            vx_req = urllib.request.Request(
+                f"https://vxreddit.com/comments/{post_id}",
+                headers={"User-Agent": "TelegramBot (like TwitterBot)", "Accept": "text/html"},
+            )
+            with urllib.request.urlopen(vx_req, timeout=8) as vx_resp:
+                vx_html = vx_resp.read().decode("utf-8", errors="ignore")
+            vm = re.search(r"v\.redd\.it(?:%2F|/)([a-zA-Z0-9]+)", vx_html)
+            if vm:
+                vreddit_id = vm.group(1)
+            if not title:
+                tm = re.search(r'property="og:title"\s+content="([^"]+)"', vx_html)
+                if tm and tm.group(1) != "vxReddit":
+                    title = html.unescape(tm.group(1)).strip()
+            if uploader == "Reddit Creator":
+                sm = re.search(r'property="og:site_name"\s+content="([^"]+)"', vx_html)
+                if sm:
+                    uploader = html.unescape(sm.group(1)).split(" - ")[0].strip()
+            if not thumb:
+                im = re.search(r'property="og:image"\s+content="([^"]+)"', vx_html)
+                if im:
+                    thumb = html.unescape(im.group(1))
+        except Exception:
+            pass
+
+    # Engine 3: Direct v.redd.it HLSPlaylist.m3u8 parser (discovers exact available resolutions & audio tracks on Fastly CDN)
+    combined = []
+    if vreddit_id:
+        res_tracks = []
+        has_audio_track = True
+        try:
+            hls_manifest_url = f"https://v.redd.it/{vreddit_id}/HLSPlaylist.m3u8"
+            m_req = urllib.request.Request(hls_manifest_url, headers={"User-Agent": BROWSER_UA})
+            with urllib.request.urlopen(m_req, timeout=8) as m_resp:
+                m3u8_text = m_resp.read().decode("utf-8", errors="ignore")
+            has_audio_track = "TYPE=AUDIO" in m3u8_text
+            seen_files = set()
+            for line_prev, line_cur in zip(m3u8_text.splitlines(), m3u8_text.splitlines()[1:]):
+                line_cur = line_cur.strip()
+                if line_cur.endswith(".m3u8") and "AUDIO" not in line_cur.upper():
+                    mp4_file = line_cur.replace(".m3u8", ".mp4")
+                    if mp4_file in seen_files:
+                        continue
+                    seen_files.add(mp4_file)
+                    hm = re.search(r"_(\d+)\.mp4", mp4_file)
+                    h_px = int(hm.group(1)) if hm else 720
+                    res_tracks.append((h_px, f"https://v.redd.it/{vreddit_id}/{mp4_file}"))
+            res_tracks.sort(key=lambda x: x[0], reverse=True)
+        except Exception:
+            if fallback_mp4:
+                hm = re.search(r"_(\d+)\.mp4", fallback_mp4)
+                res_tracks.append((int(hm.group(1)) if hm else 720, fallback_mp4))
+
+        for h_px, mp4_u in res_tracks:
+            badge = "FHD" if h_px >= 1080 else ("HD" if h_px >= 720 else "SD")
+            if has_audio_track:
+                combined.append({
+                    "format_id": f"reddit_merge::{mp4_u}",
+                    "ext": "MP4",
+                    "quality": f"{h_px}p (With Sound)",
+                    "height": h_px,
+                    "fps": 30,
+                    "category": "combined",
+                    "has_audio": True,
+                    "has_video": True,
+                    "filesize": None,
+                    "filesize_str": "Video + Audio",
+                    "direct_url": "",
+                    "label": f"MP4 {h_px}p (With Audio)",
+                    "badge": badge,
+                })
+            else:
+                combined.append({
+                    "format_id": f"direct::{mp4_u}",
+                    "ext": "MP4",
+                    "quality": f"{h_px}p Direct MP4",
+                    "height": h_px,
+                    "fps": 30,
+                    "category": "combined",
+                    "has_audio": False,
+                    "has_video": True,
+                    "filesize": None,
+                    "filesize_str": "Direct MP4",
+                    "direct_url": mp4_u,
+                    "label": f"MP4 {h_px}p (No Audio)",
+                    "badge": badge,
+                })
+
+        # Also offer fast mute/video-only stream at top resolution
+        if res_tracks and has_audio_track:
+            top_h, top_u = res_tracks[0]
+            combined.append({
+                "format_id": f"direct::{top_u}",
+                "ext": "MP4",
+                "quality": f"{top_h}p Video Only (Mute)",
+                "height": top_h,
+                "fps": 30,
+                "category": "combined",
+                "has_audio": False,
+                "has_video": True,
+                "filesize": None,
+                "filesize_str": "Direct Stream",
+                "direct_url": top_u,
+                "label": f"MP4 {top_h}p (Video Only)",
+                "badge": "MP4",
+            })
+
+    if combined:
+        final_id = post_id or vreddit_id or "reddit"
+        final_title = title or f"Reddit Video ({final_id})"
+        dl_target = f"https://v.redd.it/{vreddit_id}/HLSPlaylist.m3u8" if vreddit_id else (fallback_mp4 or url)
+        payload = {
+            "id": final_id,
+            "title": final_title,
+            "uploader": uploader,
+            "thumbnail": thumb,
+            "duration": duration,
+            "duration_str": format_duration(duration) if duration else "HD",
+            "view_count": score,
+            "webpage_url": dl_target,
+            "extractor": "Reddit",
+            "has_ffmpeg": FFMPEG_PATH is not None,
+            "formats": {"combined": combined, "video_only": [], "audio": []},
+        }
+        _cache_set_info(url, payload, {})
+        return payload
+
+    raise ValueError("Could not extract video from this Reddit post. Ensure the post contains a public active Reddit video.")
 
 
 def sanitize_filename(name: str) -> str:
@@ -2018,9 +2144,31 @@ def render_seo_page(req_path):
     # 7. Breadcrumb text (Tip 6, Tip 8)
     content = re.sub(r'<span id="breadcrumbCurrent"[^>]*>.*?</span>', f'<span id="breadcrumbCurrent">{cfg["keyword"]}</span>', content, count=1)
 
-    # 8. Platform Badge, Input Placeholder, and Active Nav Classes
+    # 8. Platform Badge, Input Placeholder, Sample Chip, and Active Nav Classes
     content = re.sub(r'<span id="heroPlatformLabel">.*?</span>', f'<span id="heroPlatformLabel">{cfg["badge"]}</span>', content, count=1)
     content = re.sub(r'placeholder="Paste your [^"]*"', f'placeholder="{cfg["placeholder"]}"', content, count=1)
+
+    sample_chips = {
+        "home": ("▶ YouTube Sample Video", "https://youtu.be/e_04ZrNroTo?si=KqAGkerHW2LDd4eL", "sf-sample-chip"),
+        "youtube": ("▶ YouTube Sample Video", "https://youtu.be/e_04ZrNroTo?si=KqAGkerHW2LDd4eL", "sf-sample-chip"),
+        "youtube_mp3": ("▶ YouTube Sample Video", "https://youtu.be/e_04ZrNroTo?si=KqAGkerHW2LDd4eL", "sf-sample-chip"),
+        "reddit": ("🔴 Reddit Sample Video", "https://www.reddit.com/r/Unexpected/comments/1y6mra5/is_that_my_friendly_neighbor/", "sf-sample-chip"),
+        "tiktok": ("🎵 TikTok Sample Video", "https://www.tiktok.com/@tiktok/video/7106594312292453675", "sf-sample-chip sf-chip-tt"),
+        "instagram": ("📸 Instagram Sample Video", "https://www.instagram.com/reel/DfznlitzL1O/", "sf-sample-chip sf-chip-ig"),
+        "facebook": ("📘 Facebook Sample Video", "https://www.facebook.com/facebook/videos/10153231379946729/", "sf-sample-chip sf-chip-fb"),
+        "twitter": ("𝕏 Twitter / X Sample", "https://x.com/NASA/status/2105842656429432894", "sf-sample-chip sf-chip-tw"),
+        "pinterest": ("📌 Pinterest Sample Pin", "https://www.pinterest.com/pin/58969076305194654/", "sf-sample-chip sf-chip-pin"),
+        "snapchat": ("👻 Snapchat Sample", "https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYYWtidGhudGZpAX1TKn0JAX1TKnXJAAAAAA", "sf-sample-chip sf-chip-snap"),
+        "amazon": ("🛒 Amazon Sample Video", "https://www.amazon.co.uk/dp/B098XNCHLD", "sf-sample-chip sf-chip-amz"),
+        "alibaba": ("📦 Alibaba Sample Video", "https://www.alibaba.com/product-detail/Kids-Entertainment-Bouncer-Bouncy-Castle-Waterslide_1601271126969.html", "sf-sample-chip sf-chip-ali"),
+    }
+    sc_label, sc_url, sc_cls = sample_chips.get(key, sample_chips["home"])
+    content = re.sub(
+        r'<button type="button" id="activeSampleChip"[^>]*>[\s\S]*?</button>',
+        f'<button type="button" id="activeSampleChip" class="{sc_cls}" data-url="{sc_url}">\n              {sc_label}\n            </button>',
+        content,
+        count=1,
+    )
 
     # Body class mode
     if cfg["body_class"]:

@@ -78,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const tryPinterestBtn = document.getElementById("tryPinterestBtn");
   const tryAmazonBtn = document.getElementById("tryAmazonBtn");
   const tryAlibabaBtn = document.getElementById("tryAlibabaBtn");
+  const tryRedditBtn = document.getElementById("tryRedditBtn");
   const howToHeading = document.getElementById("howToHeading");
   const breadcrumbCurrent = document.getElementById("breadcrumbCurrent");
 
@@ -238,149 +239,186 @@ document.addEventListener("DOMContentLoaded", () => {
       helperTipText.textContent = "";
     }
 
-    if (isInitialLoad) {
-      return;
-    }
-
     if (platform === "YouTube") {
-      heroTitle.textContent = "YouTube Video Downloader";
-      heroSubtitle.textContent =
-        "Download YouTube videos in MP4, 1080p, 720p, 4K HD and MP3 audio instantly for free with our fast YouTube video downloader.";
-      videoUrlInput.placeholder =
-        "Paste your YouTube video link here (e.g., https://www.youtube.com/watch?v=...)...";
+      if (!isInitialLoad) {
+        heroTitle.textContent = "YouTube Video Downloader";
+        heroSubtitle.textContent =
+          "Download YouTube videos in MP4, 1080p, 720p, 4K HD and MP3 audio instantly for free with our fast YouTube video downloader.";
+        videoUrlInput.placeholder =
+          "Paste your YouTube video link here (e.g., https://www.youtube.com/watch?v=...)...";
+        if (howToHeading) {
+          howToHeading.textContent = "How to Download YouTube Videos in 3 Easy Steps";
+        }
+      }
       if (activeSampleChip) {
         activeSampleChip.textContent = "▶ YouTube Sample Video";
         activeSampleChip.dataset.url = "https://youtu.be/e_04ZrNroTo?si=KqAGkerHW2LDd4eL";
         activeSampleChip.className = "sf-sample-chip";
       }
-      if (howToHeading) {
-        howToHeading.textContent = "How to Download YouTube Videos in 3 Easy Steps";
-      }
     } else if (platform === "Facebook") {
-      heroTitle.textContent = "Facebook Video Downloader";
-      heroSubtitle.textContent =
-        "Download Facebook videos, Reels, and Watch clips in full HD 1080p MP4 with our free online Facebook video downloader.";
-      videoUrlInput.placeholder =
-        "Paste your Facebook video or Reel link here...";
+      if (!isInitialLoad) {
+        heroTitle.textContent = "Facebook Video Downloader";
+        heroSubtitle.textContent =
+          "Download Facebook videos, Reels, and Watch clips in full HD 1080p MP4 with our free online Facebook video downloader.";
+        videoUrlInput.placeholder =
+          "Paste your Facebook video or Reel link here...";
+        if (howToHeading) {
+          howToHeading.textContent = "How to Download Facebook Videos & Reels in 3 Easy Steps";
+        }
+      }
       if (activeSampleChip) {
         activeSampleChip.textContent = "📘 Facebook Sample Video";
         activeSampleChip.dataset.url = "https://www.facebook.com/facebook/videos/10153231379946729/";
         activeSampleChip.className = "sf-sample-chip sf-chip-fb";
       }
-      if (howToHeading) {
-        howToHeading.textContent = "How to Download Facebook Videos & Reels in 3 Easy Steps";
-      }
     } else if (platform === "Instagram") {
-      heroTitle.textContent = "Instagram Video Downloader";
-      heroSubtitle.textContent =
-        "Download Instagram videos, Reels, IGTV, and Stories in high quality MP4 with our fast Instagram video downloader.";
-      videoUrlInput.placeholder =
-        "Paste your Instagram Reel, Story, or video link here...";
+      if (!isInitialLoad) {
+        heroTitle.textContent = "Instagram Video Downloader";
+        heroSubtitle.textContent =
+          "Download Instagram videos, Reels, IGTV, and Stories in high quality MP4 with our fast Instagram video downloader.";
+        videoUrlInput.placeholder =
+          "Paste your Instagram Reel, Story, or video link here...";
+        if (howToHeading) {
+          howToHeading.textContent = "How to Download Instagram Videos & Reels in 3 Easy Steps";
+        }
+      }
       if (activeSampleChip) {
         activeSampleChip.textContent = "📸 Instagram Sample Video";
         activeSampleChip.dataset.url = "https://www.instagram.com/reel/DfznlitzL1O/";
         activeSampleChip.className = "sf-sample-chip sf-chip-ig";
       }
-      if (howToHeading) {
-        howToHeading.textContent = "How to Download Instagram Videos & Reels in 3 Easy Steps";
-      }
     } else if (platform === "TikTok") {
-      heroTitle.textContent = "TikTok Video Downloader";
-      heroSubtitle.textContent =
-        "Download TikTok videos without watermark in crystal-clear MP4 HD with our lightning-fast TikTok video downloader.";
-      videoUrlInput.placeholder =
-        "Paste your TikTok video link here (e.g., https://www.tiktok.com/@...)...";
+      if (!isInitialLoad) {
+        heroTitle.textContent = "TikTok Video Downloader";
+        heroSubtitle.textContent =
+          "Download TikTok videos without watermark in crystal-clear MP4 HD with our lightning-fast TikTok video downloader.";
+        videoUrlInput.placeholder =
+          "Paste your TikTok video link here (e.g., https://www.tiktok.com/@...)...";
+        if (howToHeading) {
+          howToHeading.textContent = "How to Download TikTok Videos Without Watermark in 3 Easy Steps";
+        }
+      }
       if (activeSampleChip) {
         activeSampleChip.textContent = "🎵 TikTok Sample Video";
         activeSampleChip.dataset.url = "https://www.tiktok.com/@tiktok/video/7106594312292453675";
         activeSampleChip.className = "sf-sample-chip sf-chip-tt";
       }
-      if (howToHeading) {
-        howToHeading.textContent = "How to Download TikTok Videos Without Watermark in 3 Easy Steps";
-      }
     } else if (platform === "Snapchat") {
-      heroTitle.textContent = "Snapchat Video Downloader";
-      heroSubtitle.textContent =
-        "Download Snapchat videos, Spotlight clips, and public Stories in MP4 HD without watermark with our free Snapchat video downloader.";
-      videoUrlInput.placeholder =
-        "Paste your Snapchat link here (e.g., https://www.snapchat.com/spotlight/...)...";
+      if (!isInitialLoad) {
+        heroTitle.textContent = "Snapchat Video Downloader";
+        heroSubtitle.textContent =
+          "Download Snapchat videos, Spotlight clips, and public Stories in MP4 HD without watermark with our free Snapchat video downloader.";
+        videoUrlInput.placeholder =
+          "Paste your Snapchat link here (e.g., https://www.snapchat.com/spotlight/...)...";
+        if (howToHeading) {
+          howToHeading.textContent = "How to Download Snapchat Spotlight Videos & Stories in 3 Easy Steps";
+        }
+      }
       if (activeSampleChip) {
         activeSampleChip.textContent = "👻 Snapchat Sample";
         activeSampleChip.dataset.url = "https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYYWtidGhudGZpAX1TKn0JAX1TKnXJAAAAAA";
         activeSampleChip.className = "sf-sample-chip sf-chip-snap";
       }
-      if (howToHeading) {
-        howToHeading.textContent = "How to Download Snapchat Spotlight Videos & Stories in 3 Easy Steps";
-      }
     } else if (platform === "Twitter") {
-      heroTitle.textContent = "Twitter Video Downloader";
-      heroSubtitle.textContent =
-        "Download Twitter videos and X posts, GIF clips in MP4 1080p HD with our secure Twitter video downloader.";
-      videoUrlInput.placeholder =
-        "Paste your Twitter or X video link here (e.g., https://x.com/...)...";
+      if (!isInitialLoad) {
+        heroTitle.textContent = "Twitter Video Downloader";
+        heroSubtitle.textContent =
+          "Download Twitter videos and X posts, GIF clips in MP4 1080p HD with our secure Twitter video downloader.";
+        videoUrlInput.placeholder =
+          "Paste your Twitter or X video link here (e.g., https://x.com/...)...";
+        if (howToHeading) {
+          howToHeading.textContent = "How to Download Twitter / X Videos & GIFs in 3 Easy Steps";
+        }
+      }
       if (activeSampleChip) {
         activeSampleChip.textContent = "𝕏 Twitter / X Sample";
         activeSampleChip.dataset.url = "https://x.com/NASA/status/2105842656429432894";
         activeSampleChip.className = "sf-sample-chip sf-chip-tw";
       }
-      if (howToHeading) {
-        howToHeading.textContent = "How to Download Twitter / X Videos & GIFs in 3 Easy Steps";
-      }
     } else if (platform === "Pinterest") {
-      heroTitle.textContent = "Pinterest Video Downloader";
-      heroSubtitle.textContent =
-        "Download Pinterest videos, Idea Pins, and animated GIFs in MP4 HD with our free online Pinterest video downloader.";
-      videoUrlInput.placeholder =
-        "Paste your Pinterest video or image link here...";
+      if (!isInitialLoad) {
+        heroTitle.textContent = "Pinterest Video Downloader";
+        heroSubtitle.textContent =
+          "Download Pinterest videos, Idea Pins, and animated GIFs in MP4 HD with our free online Pinterest video downloader.";
+        videoUrlInput.placeholder =
+          "Paste your Pinterest video or image link here...";
+        if (howToHeading) {
+          howToHeading.textContent = "How to Download Pinterest Videos & Images in 3 Easy Steps";
+        }
+      }
       if (activeSampleChip) {
         activeSampleChip.textContent = "📌 Pinterest Sample Pin";
         activeSampleChip.dataset.url = "https://www.pinterest.com/pin/58969076305194654/";
         activeSampleChip.className = "sf-sample-chip sf-chip-pin";
       }
-      if (howToHeading) {
-        howToHeading.textContent = "How to Download Pinterest Videos & Images in 3 Easy Steps";
-      }
     } else if (platform === "Amazon") {
-      heroTitle.textContent = "Amazon Video Downloader";
-      heroSubtitle.textContent =
-        "Download Amazon product videos, review videos, and high-res listing images in MP4 HD with our Amazon video downloader.";
-      videoUrlInput.placeholder =
-        "Paste your Amazon product video link or ASIN here...";
+      if (!isInitialLoad) {
+        heroTitle.textContent = "Amazon Video Downloader";
+        heroSubtitle.textContent =
+          "Download Amazon product videos, review videos, and high-res listing images in MP4 HD with our Amazon video downloader.";
+        videoUrlInput.placeholder =
+          "Paste your Amazon product video link or ASIN here...";
+        if (howToHeading) {
+          howToHeading.textContent = "How to Download Amazon Product Videos in 3 Easy Steps";
+        }
+      }
       if (activeSampleChip) {
         activeSampleChip.textContent = "🛒 Amazon Sample Video";
         activeSampleChip.dataset.url = "https://www.amazon.co.uk/dp/B098XNCHLD";
         activeSampleChip.className = "sf-sample-chip sf-chip-amz";
       }
-      if (howToHeading) {
-        howToHeading.textContent = "How to Download Amazon Product Videos in 3 Easy Steps";
-      }
     } else if (platform === "Alibaba") {
-      heroTitle.textContent = "Alibaba Video Downloader";
-      heroSubtitle.textContent =
-        "Download Alibaba product videos and supplier factory inspection clips in MP4 HD with our Alibaba video downloader.";
-      videoUrlInput.placeholder =
-        "Paste your Alibaba product video link here...";
+      if (!isInitialLoad) {
+        heroTitle.textContent = "Alibaba Video Downloader";
+        heroSubtitle.textContent =
+          "Download Alibaba product videos and supplier factory inspection clips in MP4 HD with our Alibaba video downloader.";
+        videoUrlInput.placeholder =
+          "Paste your Alibaba product video link here...";
+        if (howToHeading) {
+          howToHeading.textContent = "How to Download Alibaba Product Videos in 3 Easy Steps";
+        }
+      }
       if (activeSampleChip) {
         activeSampleChip.textContent = "📦 Alibaba Sample Video";
         activeSampleChip.dataset.url =
           "https://www.alibaba.com/product-detail/Kids-Entertainment-Bouncer-Bouncy-Castle-Waterslide_1601271126969.html";
         activeSampleChip.className = "sf-sample-chip sf-chip-ali";
       }
-      if (howToHeading) {
-        howToHeading.textContent = "How to Download Alibaba Product Videos in 3 Easy Steps";
+    } else if (platform === "Reddit") {
+      if (!isInitialLoad) {
+        heroTitle.textContent = "Reddit Video Downloader with Audio";
+        heroSubtitle.textContent =
+          "Download Reddit videos with audio in full HD MP4 with our free, clean Reddit video downloader.";
+        videoUrlInput.placeholder =
+          "Paste your Reddit post link or v.redd.it URL here...";
+        if (howToHeading) {
+          howToHeading.textContent = "How to Download Reddit Videos with Sound in 3 Easy Steps";
+        }
       }
-    } else {
-      heroTitle.textContent = `${platform} Video Downloader`;
-      heroSubtitle.textContent = `Download ${platform} videos in MP4 HD and audio formats directly to your device with our ${platform} video downloader.`;
-      videoUrlInput.placeholder = `Paste your ${platform} video link here...`;
       if (activeSampleChip) {
-        activeSampleChip.textContent = `▶ ${platform} Sample`;
-        activeSampleChip.dataset.url = "https://www.youtube.com/watch?v=jNQXAC9IVRw";
+        activeSampleChip.textContent = "🔴 Reddit Sample Video";
+        activeSampleChip.dataset.url =
+          "https://www.reddit.com/r/Unexpected/comments/1y6mra5/is_that_my_friendly_neighbor/";
         activeSampleChip.className = "sf-sample-chip";
       }
-      if (howToHeading) {
-        howToHeading.textContent = `How to Download ${platform} Videos in 3 Easy Steps`;
+    } else {
+      if (!isInitialLoad) {
+        heroTitle.textContent = `${platform} Video Downloader`;
+        heroSubtitle.textContent = `Download ${platform} videos in MP4 HD and audio formats directly to your device with our ${platform} video downloader.`;
+        videoUrlInput.placeholder = `Paste your ${platform} video link here...`;
+        if (howToHeading) {
+          howToHeading.textContent = `How to Download ${platform} Videos in 3 Easy Steps`;
+        }
       }
+      if (activeSampleChip) {
+        activeSampleChip.textContent = `▶ ${platform} Sample`;
+        activeSampleChip.dataset.url = "https://youtu.be/e_04ZrNroTo?si=KqAGkerHW2LDd4eL";
+        activeSampleChip.className = "sf-sample-chip";
+      }
+    }
+
+    if (isInitialLoad) {
+      return;
     }
 
     if (breadcrumbCurrent) {
@@ -551,6 +589,17 @@ document.addEventListener("DOMContentLoaded", () => {
       videoUrlInput.value = sampleAli;
       clearInputBtn.classList.remove("hidden");
       fetchVideoInfo(sampleAli);
+    });
+  }
+
+  if (tryRedditBtn) {
+    tryRedditBtn.addEventListener("click", () => {
+      const sampleRd =
+        "https://www.reddit.com/r/Unexpected/comments/1y6mra5/is_that_my_friendly_neighbor/";
+      setActivePlatform("Reddit", true, true);
+      videoUrlInput.value = sampleRd;
+      clearInputBtn.classList.remove("hidden");
+      fetchVideoInfo(sampleRd);
     });
   }
 
@@ -795,6 +844,8 @@ document.addEventListener("DOMContentLoaded", () => {
       videoExtractor.style.background = "#ff9900";
     } else if (isAli) {
       videoExtractor.style.background = "#ff6a00";
+    } else if (extName.includes("reddit")) {
+      videoExtractor.style.background = "#ff4500";
     } else {
       videoExtractor.style.background = "";
     }
